@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balotario AZ-104</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 640px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .question-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+    .option input {
+      margin-top: 0.25rem;
+      transform: scale(1.1);
+    }
+    .option-label {
+      font-size: 0.95rem;
+    }
+    .option.correct {
+      border-color: #16a34a;
+      background: rgba(22,163,74,0.12);
+    }
+    .option.incorrect {
+      border-color: #dc2626;
+      background: rgba(220,38,38,0.12);
+    }
+    .badge-multi {
+      font-size: 0.75rem;
+      color: #f97316;
+      margin-bottom: 0.25rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+    }
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .feedback {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .feedback.ok {
+      color: #4ade80;
+    }
+    .feedback.bad {
+      color: #fca5a5;
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div><span id="currentIdx">1</span>/<span id="totalQ">?</span></div>
+        <div class="pill">
+          Puntaje: <span id="score">0</span>
+        </div>
+      </div>
+
+      <div class="question-id" id="qId"></div>
+      <div class="badge-multi" id="multiBadge" style="display:none;">
+        (Selecciona todas las que apliquen)
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="options" id="options"></div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="prevBtn">Anterior</button>
+        <button class="btn-primary" id="checkBtn">Validar</button>
+        <button class="btn-secondary" id="nextBtn">Siguiente</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Pega aquí el contenido de balotario_az104_lotes1_7.json
+    // ============================================================
+    const questions = [
+      
+  {
+    "id": 1,
+    "question": "Which Azure service is Azure Container Apps (ACA) built on top of to provide a serverless container platform?",
+    "options": [
+      "Azure Kubernetes Service (AKS)",
+      "Kubernetes",
+      "Azure Functions",
+      "Azure App Service"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Azure Container Apps (ACA) is built on top of Kubernetes to provide a serverless container platform where Azure manages orchestration and underlying nodes."
+  },
+  {
+    "id": 2,
+    "question": "When creating an App Service plan, which factor primarily determines the choice between Dev/Test and Production pricing tiers?",
+    "options": [
+      "Availability zones",
+      "Security compliance",
+      "Compute resources and scaling capabilities",
+      "Azure subscription type"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Production tiers provide dedicated compute resources and scaling capabilities suitable for high-demand applications compared to Dev/Test tiers."
+  },
+  {
+    "id": 3,
+    "question": "You are adding a custom domain 'app.example.com' to your Azure App Service. Which DNS record type is typically required for domain validation?",
+    "options": [
+      "MX",
+      "CNAME",
+      "PTR",
+      "SPF"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Typically, a CNAME record is created to verify ownership when adding a custom domain to Azure App Service."
+  },
+  {
+    "id": 4,
+    "question": "What is the minimum number of virtual machines required in an availability set to qualify for the Azure SLA of 99.95%?",
+    "options": [
+      "1",
+      "2"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Azure requires at least two virtual machines in an availability set to guarantee the SLA of 99.95%."
+  },
+  {
+    "id": 5,
+    "question": "What is a prerequisite for enabling private access to an Azure Container Registry (ACR)?",
+    "options": [
+      "Premium tier subscription",
+      "Creation of a private endpoint",
+      "Use of a customer-managed key",
+      "Deployment in multiple availability zones"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Private access for ACR requires setting up a private endpoint connection to keep traffic inside the Azure network."
+  },
+  {
+    "id": 6,
+    "question": "Which parameter should be used in PowerShell to specify the availability zone when creating a disk for a VM deployed into an availability zone?",
+    "options": [
+      "-Zone",
+      "-AvailabilityZone",
+      "-ZoneParameter",
+      "-Location"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Use the -Zone parameter with New-AzDiskConfig to specify the availability zone."
+  },
+  {
+    "id": 7,
+    "question": "Based on Azure's 30-day sliding retention scale, what time interval would automatic hourly backups that are 5 days old be retained?",
+    "options": [
+      "All hourly backups would be retained.",
+      "Every 3rd hour of backups would be retained.",
+      "Every 6th hour of backups would be retained.",
+      "Every 12th hour of backups would be retained."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Between days 4 and 14, Azure keeps every 3rd hourly backup."
+  },
+  {
+    "id": 8,
+    "question": "When resizing a data disk attached to a virtual machine in Azure, which of the following is the correct step?",
+    "options": [
+      "Use the Azure Portal to increase the disk size and then resize the partition within the VM",
+      "Use Azure CLI to increase the disk size, and the partition will resize automatically",
+      "Detach the data disk, resize it using the Azure PowerShell cmdlet, and reattach it",
+      "Increase the size in the VM's disk settings without needing further actions"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "After increasing a disk's size, the partition must be extended within the operating system."
+  },
+  {
+    "id": 9,
+    "question": "Which language is used to author Azure Resource Manager (ARM) templates?",
+    "options": [
+      "YAML",
+      "XML",
+      "JSON",
+      "Python"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "ARM templates use JSON to define resources in a declarative manner."
+  },
+  {
+    "id": 10,
+    "question": "In a large-scale virtual machine scale set (VMSS), what role does the spreading algorithm play when instances are deployed?",
+    "options": [
+      "It determines the scaling factor for each instance.",
+      "It decides how instances are distributed across fault domains.",
+      "It controls the upgrade policy for VM instances.",
+      "It specifies the placement of instances across availability zones."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The spreading algorithm distributes VMSS instances across fault domains to improve resiliency."
+  },
+  {
+    "id": 11,
+    "question": "What advantage does Rules-based scaling offer over Manual and Automatic scaling in Azure App Service plans?",
+    "options": [
+      "Greater control over scaling triggers",
+      "Lower cost per instance",
+      "Faster response to traffic spikes",
+      "Simplicity in configuration"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Rules-based scaling allows customization of scaling triggers based on specific metrics."
+  },
+  {
+    "id": 12,
+    "question": "What should you do after customizing parameters in the Azure portal's template deployment view before triggering the deployment?",
+    "options": [
+      "Click the Review + Create button",
+      "Export the template to a storage account",
+      "Manually validate the template",
+      "Delete the existing resources"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Review + Create validates the parameters and proceeds with deployment."
+  },
+  {
+    "id": 13,
+    "question": "What are the limitations of managed certificates in Azure App Service?",
+    "options": [
+      "They cannot be used with private DNS.",
+      "They require additional fees for renewal.",
+      "They must be stored in an Azure Key Vault.",
+      "They are limited to a maximum of 128-bit encryption."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Managed certificates require the App Service to be publicly accessible."
+  },
+  {
+    "id": 14,
+    "question": "What steps are necessary to change an Azure VM size if the desired size is not available in the current region or hardware cluster?",
+    "options": [
+      "Deallocate the VM and resize it to any available size",
+      "Move the VM to a different region that supports the desired size",
+      "Delete the VM and recreate it with the desired size",
+      "Increase the VM's disk capacity to compensate for unavailable sizes"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Resizing depends on region and hardware availability."
+  },
+  {
+    "id": 15,
+    "question": "What does the Restart Policy option 'Always' signify when configuring an Azure Container Instance (ACI)?",
+    "options": [
+      "Containers restart only on failure",
+      "Containers restart irrespective of how they are stopped",
+      "Containers never restart",
+      "Containers restart based on a defined schedule"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Restart Policy 'Always' means containers restart regardless of stop reason."
+  },
+  {
+    "id": 16,
+    "question": "In Azure Container Apps (ACA), what is the maximum range for setting replicas?",
+    "options": [
+      "0 to 100 replicas",
+      "0 to 300 replicas",
+      "0 to 500 replicas",
+      "0 to 1000 replicas"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "ACA allows setting replicas in a range from 0 to 300."
+  },
+  {
+    "id": 17,
+    "question": "You need to deploy a highly scalable ACA environment that can automatically adjust its instance count based on workload demands. Which feature should you configure?",
+    "options": [
+      "Workload profiles",
+      "Autoscale rules",
+      "Virtual Machine Scale Sets (VMSS)",
+      "Kubernetes pods"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Autoscale rules adjust container instances based on metrics."
+  },
+  {
+    "id": 18,
+    "question": "Your organization requires that all inbound traffic to the Azure App Service must originate from a specific IP range. What should you configure to meet this requirement?",
+    "options": [
+      "Enable access restrictions and add a rule with the specific IP range",
+      "Configure Azure service tags for inbound traffic",
+      "Use Azure Front Door for traffic routing",
+      "Update the DNS records for the custom domain"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Access restrictions enforce inbound traffic rules at the IP level."
+  },
+  {
+    "id": 19,
+    "question": "What is the primary difference in scaling capabilities between Azure Container Instances (ACI) and Azure Container Apps (ACA)?",
+    "options": [
+      "ACI provides manual scaling options, while ACA offers automated scaling based on HTTP requests and other metrics.",
+      "ACI supports Kubernetes-based orchestration, whereas ACA focuses on Docker Swarm.",
+      "ACI allows integration with Azure DevOps pipelines for continuous deployment, while ACA relies on Azure Functions.",
+      "ACI and ACA both offer identical scaling but differ in pricing."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "ACA offers more advanced and automated scaling capabilities."
+  },
+  {
+    "id": 20,
+    "question": "What should you consider before resizing an Azure VM?",
+    "options": [
+      "The number of users accessing the VM",
+      "Whether the VM is using a GPU",
+      "The current hardware cluster and region support",
+      "The amount of available disk space"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Resizing depends on whether the desired size is available in current hardware and region."
+  },
+  {
+    "id": 21,
+    "question": "What is required to enable custom backups for an Azure App Service?",
+    "options": [
+      "An Azure Key Vault for encryption keys",
+      "A premium Azure subscription",
+      "A storage account and blob container",
+      "A VPN connection to on-premises servers"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Custom backups require specifying a storage account and blob container to store the backups."
+  },
+  {
+    "id": 22,
+    "question": "What is a primary advantage of using Bicep over ARM templates?",
+    "options": [
+      "Bicep does not require JSON formatting.",
+      "Bicep supports loops and conditional values.",
+      "Bicep files are directly executed by Azure without conversion.",
+      "Bicep eliminates the need for Azure CLI."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Bicep provides advanced features such as loops and conditional values, making it more flexible than ARM templates."
+  },
+  {
+    "id": 23,
+    "question": "How does Azure verify domain ownership when adding a custom domain to an App Service?",
+    "options": [
+      "By sending an email to the domain administrator",
+      "By checking the WHOIS database",
+      "By requiring you to add specific DNS records",
+      "By calling the domain registrar"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Azure verifies ownership by requiring DNS records like CNAME, A, or TXT."
+  },
+  {
+    "id": 24,
+    "question": "What is the default behavior of inbound traffic for a public Azure App Service endpoint?",
+    "options": [
+      "Enabled with no access restrictions",
+      "Disabled",
+      "Enabled with access restrictions",
+      "Limited to Azure service tags"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "By default, a public App Service endpoint allows inbound traffic from anywhere."
+  },
+  {
+    "id": 25,
+    "question": "What is the default encryption method for Azure VM disks?",
+    "options": [
+      "User-managed encryption with Azure Key Vault",
+      "Platform-managed encryption",
+      "Client-side encryption",
+      "No encryption by default"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Azure VM disks use platform-managed encryption by default."
+  },
+  {
+    "id": 26,
+    "question": "During the validation step, you encounter a quota error when moving resources to a new subscription. What is the best course of action?",
+    "options": [
+      "Split the resources and try moving them separately",
+      "Contact Azure support to increase the quota",
+      "Delete some resources to free up quota",
+      "Move the resources to a different region first"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Quota errors require Azure support to increase limits."
+  },
+  {
+    "id": 27,
+    "question": "After moving resources to a new resource group, what immediate action is required regarding existing scripts?",
+    "options": [
+      "No action needed",
+      "Delete the old resource group",
+      "Update the scripts to reference the new resource IDs",
+      "Create new scripts from scratch"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Existing scripts must be updated with the new resource IDs."
+  },
+  {
+    "id": 28,
+    "question": "Which configuration option in Azure Virtual Machine Scale Sets helps manage updates and deployments without downtime?",
+    "options": [
+      "Rolling Upgrades",
+      "Instant Deployment",
+      "Batch Updates",
+      "Parallel Deployment"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Rolling upgrades update VMs in batches, ensuring uptime."
+  },
+  {
+    "id": 29,
+    "question": "Your team needs to deploy a container registry that can handle up to 100 GiB of included storage and 10 webhooks. Which ACR tier should you choose?",
+    "options": [
+      "Basic",
+      "Standard",
+      "Premium",
+      "None of the above"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Standard tier of ACR supports 100 GiB and up to 10 webhooks."
+  },
+  {
+    "id": 30,
+    "question": "Which Azure VM size type is suitable for workloads requiring high disk throughput and I/O, such as large transactional databases?",
+    "options": [
+      "General Purpose",
+      "Compute Optimized",
+      "Memory Optimized",
+      "Storage Optimized"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Storage optimized VMs offer high disk throughput and I/O."
+  },
+  {
+    "id": 31,
+    "question": "What is a primary use case for Azure Container Instances (ACI)?",
+    "options": [
+      "Long-term storage of large datasets",
+      "Hosting large-scale web applications",
+      "Quickly running containerized applications without managing infrastructure",
+      "Managing virtual machine scale sets"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Azure Container Instances (ACI) is ideal for quickly running containerized workloads without managing underlying infrastructure.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 32,
+    "question": "You are tasked with deploying a virtual machine using an ARM template that references an image from the Azure Marketplace. Which section of the template should you modify?",
+    "options": [
+      "imageReference",
+      "osDisk",
+      "osType",
+      "storageProfile"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The storageProfile section contains image reference details for Marketplace-based VM deployments.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 33,
+    "question": "You need to deploy a custom ARM template and specify different instance sizes based on the intended usage. How should you handle this in the template?",
+    "options": [
+      "Use the securestring type for instance size parameters",
+      "Define different instance sizes in a parameters file",
+      "Manually change the template code for each deployment",
+      "Use the REST API to modify the instance sizes"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Parameter files allow applying different instance configurations without modifying template code.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 34,
+    "question": "What feature does Visual Studio Code provide to help author Bicep files?",
+    "options": [
+      "Auto-correction",
+      "IntelliSense",
+      "Debugging",
+      "Code formatting"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "IntelliSense provides syntax suggestions and code completion for Bicep files in VS Code.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 35,
+    "question": "Which parameter should be used with the New-AzResourceGroupDeployment cmdlet to pass values defined directly in the script as .json?",
+    "options": [
+      "TemplateParameterUri",
+      "TemplateParameterFile",
+      "TemplateParameterObject",
+      "TemplateFile"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "TemplateParameterObject is used to pass parameter values inline as JSON.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 36,
+    "question": "Which statement best describes the difference between ARM templates and Bicep?",
+    "options": [
+      "ARM templates are easier to read than Bicep files.",
+      "Bicep is built on top of ARM templates and provides a simpler syntax.",
+      "ARM templates use a declarative syntax while Bicep uses imperative syntax.",
+      "Bicep does not support parameters and variables."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Bicep simplifies ARM template authoring by providing a cleaner and more readable syntax.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 37,
+    "question": "Which scaling policy should you choose to ensure optimal performance during unpredictable traffic spikes in a VMSS?",
+    "options": [
+      "Static scaling",
+      "Manual scaling",
+      "Custom scaling",
+      "Automatic scaling"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Automatic scaling dynamically adds or removes VM instances based on load.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 38,
+    "question": "What is Bicep?",
+    "options": [
+      "A replacement for ARM templates",
+      "A domain-specific language that uses declarative syntax to deploy Azure resources",
+      "A command-line tool for managing Azure resources",
+      "An Azure service for creating virtual machines"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Bicep is a DSL used for deploying Azure resources with improved syntax over ARM templates.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 39,
+    "question": "Which ACR tier supports geo-replication of container images to multiple Azure regions?",
+    "options": [
+      "Basic",
+      "Standard",
+      "Premium",
+      "All tiers support geo-replication"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Geo-replication is available only in the Premium tier of Azure Container Registry.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 40,
+    "question": "What is the primary benefit of deploying virtual machines (VMs) to different Availability Zones in Azure?",
+    "options": [
+      "Increased storage capacity",
+      "Reduced cost",
+      "Improved disaster recovery and high availability",
+      "Enhanced network speed"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Distributing VMs across Availability Zones protects against datacenter-level failures.",
+    "reference": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104"
+  },
+  {
+    "id": 41,
+    "question": "Which operational aspect of Azure Container Registry (ACR) cannot be modified after deployment?",
+    "options": [
+      "Networking configuration",
+      "Encryption settings",
+      "Geo-replication options",
+      "Availability zone configuration"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Once deployed, the availability zone configuration of ACR cannot be changed. Other aspects like networking, encryption, and geo-replication can be modified post-deployment."
+  },
+  {
+    "id": 42,
+    "question": "What is the primary cost determinant for running a VM in Azure, and where is this configured?",
+    "options": [
+      "Disk type; Disks tab",
+      "VM size (SKU); Basics tab",
+      "Network bandwidth; Networking tab",
+      "Backup configuration; Management tab"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The VM size (SKU) determines CPU, memory, disk, and networking performance. It is configured in the Basics tab during VM creation."
+  },
+  {
+    "id": 43,
+    "question": "You are deploying a production‑grade web application that requires high availability and automatic scaling. Which App Service plan pricing tier should you choose?",
+    "options": [
+      "Isolated",
+      "Dev/Test",
+      "Premium V2",
+      "Shared"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Premium V2 provides enhanced performance, auto-scaling, and support for larger workloads, making it suitable for production environments."
+  },
+  {
+    "id": 44,
+    "question": "You need to deploy an ACA instance that requires predictable performance and cost. Which environment type should you choose?",
+    "options": [
+      "Consumption only",
+      "Workload profiles with dedicated hardware",
+      "Serverless compute",
+      "General‑purpose compute"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Dedicated hardware workload profiles provide predictable performance and cost for ACA deployments."
+  },
+  {
+    "id": 45,
+    "question": "What is the default maximum number of instances supported by a single placement group in an Azure virtual machine scale set (VMSS)?",
+    "options": [
+      "50 instances",
+      "100 instances",
+      "200 instances",
+      "500 instances"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "By default, a VMSS supports up to 100 instances within a single placement group."
+  },
+  {
+    "id": 46,
+    "question": "What is the primary difference between scaling up and scaling out an App Service plan in Azure?",
+    "options": [
+      "Scaling up increases the number of instances, while scaling out increases the tier.",
+      "Scaling up changes the pricing tier, while scaling out increases the number of instances.",
+      "Scaling up decreases compute power, while scaling out increases memory.",
+      "Scaling up affects pricing only, while scaling out affects pricing and availability."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Scaling up changes the plan tier to increase compute resources. Scaling out increases the number of instances."
+  },
+  {
+    "id": 47,
+    "question": "You want to monitor the performance and resource usage of Azure Container Instances (ACI) programmatically. Which Azure service should you integrate with ACI?",
+    "options": [
+      "Azure Resource Graph",
+      "Azure Log Analytics",
+      "Azure Application Insights",
+      "Azure Monitor"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Azure Monitor provides performance metrics and usage data for ACI workloads."
+  },
+  {
+    "id": 48,
+    "question": "You are deploying a new VM that needs minimal latency to communicate with an existing VM. Which option should you configure?",
+    "options": [
+      "Configure accelerated networking on the Networking tab",
+      "Configure the same availability set on the Basics tab",
+      "Configure the same virtual network on the Networking tab",
+      "Configure a proximity placement group on the Advanced tab"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Proximity placement groups ensure VMs are placed physically close within the datacenter to minimize latency."
+  },
+  {
+    "id": 49,
+    "question": "What is the main purpose of using Availability Sets for virtual machines?",
+    "options": [
+      "To provide automatic scaling based on demand",
+      "To ensure VMs are distributed across different Azure regions",
+      "To increase fault tolerance and high availability within a single Azure region",
+      "To enable low‑latency network connections between VMs"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Availability Sets distribute VMs across fault and update domains to protect against hardware failures and planned maintenance."
+  },
+  {
+    "id": 50,
+    "question": "When changing the size of an Azure VM, what is a crucial consideration regarding the current hardware cluster?",
+    "options": [
+      "The new size must be supported in the current region",
+      "All VMs in the availability set must be stopped",
+      "The VM must be deallocated to change the hardware cluster",
+      "The VM's disk encryption settings must be compatible"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "To migrate a VM to a different hardware cluster, it must first be deallocated. For VMs in an availability set, all must be stopped."
+  },
+  {
+    "id": 51,
+    "question": "When configuring Azure Disk Encryption, which role is required to manage encryption keys in Azure Key Vault?",
+    "options": [
+      "Virtual Machine Contributor",
+      "Key Vault Contributor",
+      "Storage Account Contributor",
+      "Network Contributor"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "To manage encryption keys and configure Azure Disk Encryption, the Key Vault Contributor role is required. This role allows users to manage the keys and secrets used for disk encryption."
+  },
+  {
+    "id": 52,
+    "question": "What is the primary benefit of using deployment slots in Azure App Service?",
+    "options": [
+      "Increased network bandwidth",
+      "Enhanced DDoS protection",
+      "Simplified billing management",
+      "A/B testing and blue/green deployments"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Deployment slots allow A/B testing and blue/green deployments by hosting different versions of your application in separate slots."
+  },
+  {
+    "id": 53,
+    "question": "Your organization has a strict policy for managing encryption keys. Which option should you select to meet this requirement when enabling disk encryption on an existing VM?",
+    "options": [
+      "Use platform-managed encryption",
+      "Use client-side encryption",
+      "Use Azure Key Vault for user-managed encryption",
+      "Use built-in encryption without configuration"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "User‑managed encryption keys stored in Azure Key Vault satisfy strict organizational key‑management policies."
+  },
+  {
+    "id": 54,
+    "question": "When deploying a three-tier application in Azure, how should you configure availability sets?",
+    "options": [
+      "Place all tiers in the same availability set",
+      "Use different availability sets for each tier",
+      "Combine tiers into a single fault domain",
+      "Assign different update domains for each tier"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Each tier should reside in its own availability set to ensure high availability across update and fault domains."
+  },
+  {
+    "id": 55,
+    "question": "What is the main function of an App Service plan in Azure?",
+    "options": [
+      "To host multiple Azure Functions within a VM",
+      "To provide compute resources for running web applications",
+      "To manage database connections",
+      "To integrate AKS with web applications"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The App Service plan defines compute resources, pricing tier, and region for running web applications."
+  },
+  {
+    "id": 56,
+    "question": "When deploying a template using the Azure CLI, what parameter is used to pass values stored in a .json file at an HTTP endpoint?",
+    "options": [
+      "template-file",
+      "parameters",
+      "template-uri",
+      "parameters-uri"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The template-uri parameter specifies values stored in a JSON file accessible via an HTTP endpoint."
+  },
+  {
+    "id": 57,
+    "question": "You need to deploy a Docker container to Azure App Service with minimal configuration and quick setup. Which image source should you choose?",
+    "options": [
+      "QuickStart Templates",
+      "Azure Container Registry",
+      "Docker Hub",
+      "Private Git repository"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "QuickStart Templates provide pre-configured Docker images requiring minimal setup."
+  },
+  {
+    "id": 58,
+    "question": "Your organization requires VMs to automatically shut down at a specific time daily to save costs. Where can you configure this in the Azure portal?",
+    "options": [
+      "Basics tab",
+      "Disks tab",
+      "Management tab",
+      "Monitoring tab"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Auto-shutdown is configured in the Management tab when creating or managing a VM."
+  },
+  {
+    "id": 59,
+    "question": "When creating a new virtual machine in Azure, which setting determines the geographical location where the VM resources will be hosted?",
+    "options": [
+      "Resource Group",
+      "Virtual Network",
+      "Availability Zone",
+      "Region"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The region determines the physical datacenter location hosting the VM resources."
+  },
+  {
+    "id": 60,
+    "question": "What is the primary purpose of using bindings in Azure Container Apps (ACA)?",
+    "options": [
+      "To integrate with external databases",
+      "To enhance container security",
+      "To deploy additional container instances",
+      "To run add-ons in the same environment as the container"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Bindings in ACA allow add-ons such as Redis or Kafka to run in the same environment as the application."
+  },
+  {
+    "id": 61,
+    "question": "Which of the following is a primary feature of Azure Container Registry (ACR)?",
+    "options": [
+      "Automated scaling of container instances",
+      "Integration with Azure Kubernetes Service (AKS)",
+      "Repository for managing container images",
+      "Real-time container monitoring and logging"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Azure Container Registry provides a private repository for storing and managing container images compatible with Docker Registry 2.0."
+  },
+  {
+    "id": 62,
+    "question": "Which Azure feature is integrated with Azure Container Apps to manage container deployment and scaling?",
+    "options": [
+      "Azure Kubernetes Service (AKS)",
+      "Azure Virtual Network",
+      "Azure Logic Apps",
+      "Azure App Service"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Azure Container Apps integrates with AKS for the underlying Kubernetes infrastructure needed for scaling and orchestration."
+  },
+  {
+    "id": 63,
+    "question": "Which deployment mode should you use in ARM templates to ensure deleted resources are removed and the final state matches the template exactly?",
+    "options": [
+      "Incremental",
+      "Complete",
+      "Partial",
+      "Differential"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Complete mode removes resources not defined in the template, ensuring that the deployment matches the template exactly."
+  },
+  {
+    "id": 64,
+    "question": "Which VM size type should you choose for workloads requiring NVIDIA GPUs and visualization tasks?",
+    "options": [
+      "General Purpose",
+      "Compute Optimized",
+      "Memory Optimized",
+      "GPU Optimized"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "GPU Optimized VMs provide NVIDIA GPUs designed for compute-intensive visualization and machine learning workloads."
+  },
+  {
+    "id": 65,
+    "question": "What causes validation of resources to fail during a move operation in Azure? (Select all that apply.)",
+    "options": [
+      "Orphaned resources",
+      "Network latency issues",
+      "Quota limits",
+      "Incorrect subscriptions"
+    ],
+    "answer": [
+      "Orphaned resources",
+      "Quota limits"
+    ],
+    "explanation": "Validation can fail due to orphaned resources if all required components are not selected or due to quota limits in the destination subscription."
+  },
+  {
+    "id": 66,
+    "question": "How can you ensure that a virtual network is created before a network interface in an ARM template?",
+    "options": [
+      "By setting the location property",
+      "By using the dependsOn element",
+      "By defining a custom function",
+      "By setting the apiVersion property"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "dependsOn enforces creation order by defining explicit resource dependencies."
+  },
+  {
+    "id": 67,
+    "question": "Which ARM template element should you use to pass values from a parent template to a child template?",
+    "options": [
+      "Outputs",
+      "Variables",
+      "Parameters",
+      "Functions"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Parameters allow the parent template to pass values into nested or child templates during deployment."
+  },
+  {
+    "id": 68,
+    "question": "Which parameter type allows passing confidential data, such as passwords, securely in an ARM template?",
+    "options": [
+      "string",
+      "securestring",
+      "confidential",
+      "password"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "securestring masks sensitive values and prevents them from appearing in logs or output during deployments."
+  },
+  {
+    "id": 69,
+    "question": "In which mode does Azure Resource Manager leave unchanged resources that are not in the template but exist in the resource group?",
+    "options": [
+      "Complete",
+      "Incremental",
+      "Partial",
+      "Differential"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Incremental mode deploys only resources that appear in the template and leaves all others untouched."
+  },
+  {
+    "id": 70,
+    "question": "Your application requires dedicated CPU and memory resources that are always available. Which ACA environment should you consider?",
+    "options": [
+      "Workload profile",
+      "Consumption-only model",
+      "Function profile",
+      "Storage model"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Workload profiles offer dedicated compute and memory resources with predictable performance."
+  },
+  {
+    "id": 71,
+    "question": "You need to redeploy the exact same resources to a different resource group. What should you be aware of when using the template exported via the Export Template menu option?",
+    "options": [
+      "It includes parameterized values for easy reuse",
+      "It requires minimal editing",
+      "It might include many hard-coded values requiring significant customization",
+      "It is optimized for different environments"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The template exported via the Export Template menu option might include many hard-coded values, making it suitable for redeploying only to the same resource group and requiring significant editing for other deployments."
+  },
+  {
+    "id": 72,
+    "question": "What is the purpose of managed certificates in Azure App Service?",
+    "options": [
+      "They are provided by third-party certificate authorities.",
+      "They are free certificates issued and managed by Microsoft.",
+      "They are used for client-side authentication.",
+      "They can be exported and used with private DNS."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Managed certificates in Azure App Service are free certificates issued by Microsoft (via Digicert) and fully managed. They secure custom domains without additional cost or complexity."
+  },
+{
+    "id": 73,
+    "question": "¿Qué opción de configuración de red debe seleccionarse para permitir que se acceda a un contenedor en Azure Container Instances desde la internet pública?",
+    "options": [
+      "Private IP Address",
+      "VNet Integration",
+      "Public IP Address",
+      "Network Security Group"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Para permitir que se acceda a un contenedor en Azure Container Instances desde la internet pública, debe configurarlo con una Public IP Address. Esta configuración garantiza que se pueda acceder al contenedor desde fuera del entorno de Azure a través de internet."
+  },
+  {
+    "id": 74,
+    "question": "¿Cuál es el rol de las reglas de escalado en Azure Container Apps (ACA) y su impacto en la gestión de instancias de contenedores?",
+    "options": [
+      "Las reglas de escalado en ACA son límites predefinidos en el número de contenedores por instancia, lo que garantiza la eficiencia de los recursos.",
+      "Las reglas de escalado permiten a ACA ajustar dinámicamente la asignación de CPU y memoria basándose en las métricas de Azure Monitor.",
+      "Las reglas de escalado de ACA permiten el ajuste automático de instancias de contenedores basándose en solicitudes HTTP o en la longitud de la cola de Azure.",
+      "Las reglas de escalado de ACA dictan el número máximo de réplicas por instancia de aplicación, lo que garantiza una alta disponibilidad."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Las reglas de escalado en Azure Container Apps (ACA) permiten configurar el ajuste automático de instancias de contenedores basándose en métricas como solicitudes HTTP o la longitud de la cola de Azure. Estas reglas facilitan la utilización eficiente de los recursos escalando dinámicamente el número de réplicas hacia arriba o hacia abajo para satisfacer las demandas de carga de trabajo."
+  },
+  {
+    "id": 75,
+    "question": "¿Qué sucede con las variables de entorno y la configuración cuando se intercambian (swap) los slots de implementación en Azure App Service?",
+    "options": [
+      "Se sincronizan automáticamente entre slots",
+      "Se eliminan y deben reconfigurarse",
+      "Se conservan a menos que se cambien manualmente",
+      "Se realiza una copia de seguridad para fines de recuperación"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Al intercambiar los slots de implementación en Azure App Service, las variables de entorno y la configuración se sincronizan automáticamente entre los slots de origen y destino para mantener la coherencia."
+  },
+  {
+    "id": 76,
+    "question": "Necesita implementar rápidamente una aplicación en contenedores para una tarea de corta duración sin gestionar la infraestructura subyacente. ¿Qué servicio de Azure debería usar?",
+    "options": [
+      "Azure Kubernetes Service (AKS)",
+      "Azure Functions",
+      "Azure Container Instances (ACI)",
+      "Azure Batch"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "ACI está diseñado para la implementación rápida de aplicaciones en contenedores sin gestionar la infraestructura."
+  }
+    ];
+    // ============================================================
+    // FIN DE ZONA PARA PEGAR JSON
+    // ============================================================
+
+    // Pequeño helper para obtener el/los índices correctos
+    function getCorrectIndexes(q) {
+      let c = q.correct ?? q.answer ?? q.answers;
+      if (Array.isArray(c)) return c.slice().sort();
+      if (typeof c === "number") return [c];
+      return []; // por si acaso
+    }
+
+    let current = 0;
+    let score = 0;
+    const answeredCorrectly = new Set();
+
+    const elCurrentIdx = document.getElementById("currentIdx");
+    const elTotalQ = document.getElementById("totalQ");
+    const elScore = document.getElementById("score");
+    const elQId = document.getElementById("qId");
+    const elQText = document.getElementById("qText");
+    const elOptions = document.getElementById("options");
+    const elMultiBadge = document.getElementById("multiBadge");
+    const elFeedback = document.getElementById("feedback");
+    const elExplanation = document.getElementById("explanation");
+    const btnPrev = document.getElementById("prevBtn");
+    const btnNext = document.getElementById("nextBtn");
+    const btnCheck = document.getElementById("checkBtn");
+
+    function renderQuestion() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const isMulti = correctIdx.length > 1;
+
+      elCurrentIdx.textContent = current + 1;
+      elTotalQ.textContent = questions.length;
+      elQId.textContent = q.id || "";
+      elQText.textContent = q.question || "";
+      elFeedback.textContent = "";
+      elFeedback.className = "feedback";
+      elExplanation.textContent = "";
+
+      elMultiBadge.style.display = isMulti ? "block" : "none";
+
+      elOptions.innerHTML = "";
+      const inputType = isMulti ? "checkbox" : "radio";
+
+      (q.options || []).forEach((opt, idx) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "option";
+        wrapper.dataset.index = idx;
+
+        const input = document.createElement("input");
+        input.type = inputType;
+        input.name = "option";
+        input.className = "opt-input";
+
+        const span = document.createElement("div");
+        span.className = "option-label";
+        span.textContent = opt;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        elOptions.appendChild(wrapper);
+      });
+
+      // botonera
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === questions.length - 1;
+    }
+
+    function getSelectedIndexes() {
+      const nodes = elOptions.querySelectorAll(".opt-input");
+      const selected = [];
+      nodes.forEach((input, idx) => {
+        if (input.checked) selected.push(idx);
+      });
+      return selected.sort();
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const selected = getSelectedIndexes();
+
+      // limpiar estilos
+      elOptions.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("correct", "incorrect");
+      });
+
+      if (selected.length === 0) {
+        elFeedback.textContent = "Selecciona al menos una opción antes de validar.";
+        elFeedback.className = "feedback bad";
+        return;
+      }
+
+      const ok = arraysEqual(selected, correctIdx);
+
+      // marcar correctas/incorrectas visualmente
+      elOptions.querySelectorAll(".option").forEach(el => {
+        const idx = Number(el.dataset.index);
+        if (correctIdx.includes(idx)) {
+          el.classList.add("correct");
+        }
+        if (selected.includes(idx) && !correctIdx.includes(idx)) {
+          el.classList.add("incorrect");
+        }
+      });
+
+      if (ok) {
+        elFeedback.textContent = "✅ ¡Respuesta correcta!";
+        elFeedback.className = "feedback ok";
+        if (!answeredCorrectly.has(current)) {
+          answeredCorrectly.add(current);
+          score++;
+          elScore.textContent = score;
+        }
+      } else {
+        elFeedback.textContent = "❌ Respuesta incorrecta. Revisa las opciones marcadas en verde.";
+        elFeedback.className = "feedback bad";
+      }
+
+      if (q.explanation) {
+        elExplanation.textContent = q.explanation;
+      }
+    }
+
+    btnPrev.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    btnCheck.addEventListener("click", checkAnswer);
+
+    if (questions.length === 0) {
+      elQText.textContent = "Pega tu JSON en la constante 'questions' dentro del script.";
+      btnCheck.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>
