@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balotario AZ-104</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 640px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .question-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+    .option input {
+      margin-top: 0.25rem;
+      transform: scale(1.1);
+    }
+    .option-label {
+      font-size: 0.95rem;
+    }
+    .option.correct {
+      border-color: #16a34a;
+      background: rgba(22,163,74,0.12);
+    }
+    .option.incorrect {
+      border-color: #dc2626;
+      background: rgba(220,38,38,0.12);
+    }
+    .badge-multi {
+      font-size: 0.75rem;
+      color: #f97316;
+      margin-bottom: 0.25rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+    }
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .feedback {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .feedback.ok {
+      color: #4ade80;
+    }
+    .feedback.bad {
+      color: #fca5a5;
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div><span id="currentIdx">1</span>/<span id="totalQ">?</span></div>
+        <div class="pill">
+          Puntaje: <span id="score">0</span>
+        </div>
+      </div>
+
+      <div class="question-id" id="qId"></div>
+      <div class="badge-multi" id="multiBadge" style="display:none;">
+        (Selecciona todas las que apliquen)
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="options" id="options"></div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="prevBtn">Anterior</button>
+        <button class="btn-primary" id="checkBtn">Validar</button>
+        <button class="btn-secondary" id="nextBtn">Siguiente</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Pega aquí el contenido de balotario_az104_lotes1_7.json
+    // ============================================================
+    const questions = [
+      
+  {
+    "id": 1,
+    "question": "¿Cuáles son las tres opciones disponibles para controlar cómo se copian los objetos al contenedor de destino en la replicación de objetos?",
+    "options": [
+      "All Objects, New Objects Only, Custom",
+      "All Objects, Recent Objects, Custom",
+      "Everything, Only New Objects, Custom",
+      "Everything, Recent Objects, Custom"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Las tres opciones son Everything, Only New Objects y Custom."
+  },
+  {
+    "id": 2,
+    "question": "¿Qué servicio de almacenamiento en Azure proporciona un almacén de tipo NoSQL para datos estructurados?",
+    "options": [
+      "Blobs",
+      "Tables",
+      "Queues",
+      "Files"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Azure Tables ofrece un almacenamiento NoSQL para datos estructurados sin esquema fijo."
+  },
+  {
+    "id": 3,
+    "question": "¿En qué consiste el escenario de \"bring your own key\" (BYOK) en Azure Key Vault?",
+    "options": [
+      "Permite usar únicamente claves generadas por Azure",
+      "Permite importar y usar tus propias claves en Azure Key Vault",
+      "Permite compartir claves entre varias suscripciones de Azure",
+      "Permite generar claves directamente en la cuenta de almacenamiento"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "BYOK permite importar y utilizar tus propias claves en Key Vault."
+  },
+  {
+    "id": 4,
+    "question": "¿Cuáles son los tres tipos de blobs de almacenamiento en Azure?",
+    "options": [
+      "Block Blobs, Append Blobs, Page Blobs",
+      "Standard Blobs, Premium Blobs, Archive Blobs",
+      "General-Purpose Blobs, Specialized Blobs, Virtual Blobs",
+      "Simple Blobs, Complex Blobs, Structured Blobs"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Los tres tipos son Block Blobs, Append Blobs y Page Blobs."
+  },
+  {
+    "id": 5,
+    "question": "¿Qué operaciones registra el blob change feed en Azure Blob Storage?",
+    "options": [
+      "Operaciones de lectura y escritura",
+      "Operaciones de creación, modificación y eliminación",
+      "Operaciones de copia y movimiento",
+      "Operaciones de consulta y filtrado"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "El change feed registra creación, modificación y eliminación."
+  },
+  {
+    "id": 6,
+    "question": "¿Qué acciones puedes configurar en las reglas de administración del ciclo de vida para blobs en Azure Storage?",
+    "options": [
+      "Move to Cool, Move to Cold, Move to Archive, Delete",
+      "Encrypt, Compress, Delete, Archive",
+      "Synchronize, Replicate, Delete, Compress",
+      "Restore, Back up, Move to Hot, Encrypt"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Se pueden mover a Cool, Cold, Archive o eliminar."
+  },
+  {
+    "id": 7,
+    "question": "¿Se puede deshabilitar el cifrado en una cuenta de almacenamiento de Azure?",
+    "options": [
+      "Sí, por el propietario de la cuenta",
+      "Sí, a través del soporte de Azure",
+      "No, se habilita automáticamente y no se puede deshabilitar",
+      "No, a menos que se use una cuenta de almacenamiento premium"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "El cifrado está habilitado automáticamente y no puede deshabilitarse."
+  },
+  {
+    "id": 8,
+    "question": "¿Qué método de replicación de Azure Storage garantiza que los datos se repliquen en una región secundaria?",
+    "options": [
+      "LRS (Locally Redundant Storage)",
+      "ZRS (Zone-Redundant Storage)",
+      "GRS (Geo-Redundant Storage)",
+      "RA-GRS (Read-Access Geo-Redundant Storage)"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "GRS replica los datos en una región secundaria."
+  },
+  {
+    "id": 9,
+    "question": "Un desarrollador necesita garantizar que no haya downtime al cambiar la clave primaria de una cuenta de almacenamiento. ¿Qué debe hacer?",
+    "options": [
+      "Usar la técnica de rotación de claves",
+      "Regenerar la clave primaria directamente",
+      "Eliminar la cuenta de almacenamiento",
+      "Cambiar el tipo de cuenta"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "La rotación de claves permite alternar sin downtime."
+  },
+  {
+    "id": 10,
+    "question": "¿Cuándo sería preferible usar SAS en lugar de claves de cuenta?",
+    "options": [
+      "Para conceder acceso temporal a un recurso con permisos específicos",
+      "Para acceso permanente a toda la cuenta",
+      "Para operaciones de lectura/escritura de alta frecuencia",
+      "Para integración con redes locales usando IP privadas"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "SAS permite acceso temporal sin exponer claves."
+  },
+  {
+    "id": 11,
+    "question": "What are the implications of not explicitly assigning an access tier to a blob in Azure Blob Storage?",
+    "options": [
+      "The blob will default to the Archive tier.",
+      "The blob will inherit the access tier setting from the storage account.",
+      "The blob will be automatically deleted after 30 days.",
+      "The blob cannot be accessed until an access tier is assigned."
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 12,
+    "question": "What is Soft Delete in Azure Storage?",
+    "options": [
+      "A feature that permanently deletes blobs and files after 7 days.",
+      "A feature that allows recovery of deleted blobs and blob snapshots within a specified retention period.",
+      "A feature that automatically creates snapshots of blobs for versioning purposes.",
+      "A feature that encrypts blobs to protect data at rest."
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 13,
+    "question": "A company needs a storage account that can maintain availability during a data center failure. Which replication options should they consider?",
+    "options": [
+      "LRS and ZRS",
+      "ZRS and GRS",
+      "GRS and RA-GRS",
+      "LRS and GRS"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 14,
+    "question": "Which type of blob is optimized for efficient uploads and downloads, suitable for video and image storage?",
+    "options": [
+      "Page Blobs",
+      "Block Blobs",
+      "Append Blobs",
+      "Managed Disks"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 15,
+    "question": "If an organization has specific compliance requirements for key management, which encryption configuration should they choose for their Azure storage account?",
+    "options": [
+      "Microsoft-managed keys",
+      "Customer-managed keys",
+      "Default encryption",
+      "No encryption"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 16,
+    "question": "Which of the following storage services is not supported by Azure Storage Explorer?",
+    "options": [
+      "Blob Storage",
+      "Azure Tables",
+      "Azure Queues",
+      "Azure SQL Database"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 17,
+    "question": "What is the maximum number of prefixes you can specify per rule in Azure Storage lifecycle management?",
+    "options": [
+      "5 prefixes",
+      "10 prefixes",
+      "15 prefixes",
+      "20 prefixes"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 18,
+    "question": "A developer needs to grant temporary read and write access to a specific blob for a partner organization. Which method should they use to generate the required access?",
+    "options": [
+      "Create an account-level SAS",
+      "Generate a service-level SAS token for the blob",
+      "Share the storage account key with the partner",
+      "Configure a virtual network service endpoint"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 19,
+    "question": "Which of the following is the highest-level scope for assigning an RBAC role in Azure Storage?",
+    "options": [
+      "Container",
+      "Queue",
+      "Storage account",
+      "Subscription"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 20,
+    "question": "How many access policies can you have on a container, table, queue, or file share?",
+    "options": [
+      "3",
+      "5",
+      "7",
+      "10"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 21,
+    "question": "Which replication option makes three synchronous copies to multiple availability zones within a single region?",
+    "options": [
+      "LRS",
+      "GRS",
+      "ZRS",
+      "RA-GRS"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 22,
+    "question": "You have a critical application that requires maintaining previous versions of large blobs for auditing purposes. Which feature of Azure Blob Storage should you enable?",
+    "options": [
+      "Blob Soft Delete",
+      "Blob Change Feed",
+      "Blob Versioning",
+      "Blob Lifecycle Management"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 23,
+    "question": "What happens to the destination container once a replication policy is created?",
+    "options": [
+      "It becomes read-only",
+      "It allows both read and write operations",
+      "It allows write operations only",
+      "It becomes inaccessible"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 24,
+    "question": "When would you use Snapshots in Azure Storage?",
+    "options": [
+      "To automatically archive blobs to long-term storage",
+      "To revert blob objects in a container to a specific point-in-time version",
+      "To synchronize blob data across Azure regions",
+      "To compress blob data for reduced storage costs"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 25,
+    "question": "Which built-in RBAC role grants read/write/delete permissions for Blob Storage?",
+    "options": [
+      "Storage Blob Data Reader",
+      "Storage Blob Data Owner",
+      "Storage Blob Data Contributor",
+      "Storage Blob Data Message Processor"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 26,
+    "question": "How can you perform an asynchronous blob copy between two storage accounts using AzCopy?",
+    "options": [
+      "Use the azcopy copy command with the --recursive=true option",
+      "Execute the azcopy sync command with the source and destination URLs",
+      "Run the azcopy copy command with the source and destination URLs and SAS token",
+      "Utilize the azcopy login command followed by the azcopy copy command"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 27,
+    "question": "What is the main difference between Blob-level tiering and Account-level tiering in Azure Blob Storage?",
+    "options": [
+      "Blob-level tiering allows changing access tiers without moving data between accounts, while Account-level tiering sets the default tier for all blobs in the account.",
+      "Blob-level tiering is more cost-effective than Account-level tiering.",
+      "Account-level tiering offers better performance compared to Blob-level tiering.",
+      "Blob-level tiering is only applicable to Archive tier blobs."
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 28,
+    "question": "What benefit does AzCopy offer for data transfers to and from Azure Storage?",
+    "options": [
+      "Real-time synchronization of blobs",
+      "Asynchronous operations and fault tolerance",
+      "Native integration with Azure AD for security",
+      "Automatic encryption of transferred data"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 29,
+    "question": "What command can be used to automatically reconnect and map an Azure file share after Windows is rebooted?",
+    "options": [
+      "azcopy sync command",
+      "net use command with persistent:yes",
+      "mount command on Linux",
+      "cmdkey command with /add option"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 30,
+    "question": "What is the purpose of Blob Change Feed in Azure Storage?",
+    "options": [
+      "To archive blobs to the Archive tier automatically",
+      "To keep a log of all create, modify, and delete operations on blob objects",
+      "To manage snapshots of blob containers",
+      "To synchronize blob data across multiple storage accounts"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 31,
+    "question": "A user is unable to list data in a blob container after switching the authentication method to Entra ID. What should be done to resolve this issue?",
+    "options": [
+      "Assign the Storage Blob Data Owner role at the subscription level",
+      "Assign the Storage Blob Data Reader role at the container level",
+      "Assign the Storage Queue Data Contributor role at the queue level",
+      "Assign the Storage Blob Data Message Processor role at the container level"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 32,
+    "question": "A company wants to reduce read latency for users by enabling them to read data from a region closer to them. Which Azure Storage feature should they use?",
+    "options": [
+      "VM backup",
+      "Object replication",
+      "Blob snapshots",
+      "Hot access tier"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 33,
+    "question": "What is the simplest method to create a Shared Access Signature (SAS) token for an Azure storage account?",
+    "options": [
+      "Using the Azure portal",
+      "Using Azure CLI",
+      "Using REST APIs",
+      "Using Azure PowerShell"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 34,
+    "question": "What are the primary differences between Page Blobs and Block Blobs in Azure Blob Storage?",
+    "options": [
+      "Page Blobs are optimized for streaming media, while Block Blobs are optimized for database storage.",
+      "Page Blobs support random access read and write operations, while Block Blobs are optimized for efficient uploads and downloads.",
+      "Page Blobs have a maximum size limit of 8 TiB, while Block Blobs can scale up to 190 TiB.",
+      "Page Blobs are used exclusively for virtual machine disk storage, while Block Blobs are used for general-purpose file storage."
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 35,
+    "question": "What type of encryption is used for data in an Azure storage account?",
+    "options": [
+      "RSA 2048-bit encryption",
+      "AES 128-bit encryption",
+      "AES 256-bit encryption",
+      "SHA-256 encryption"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 36,
+    "question": "How long does it typically take to rehydrate data from the Archive storage tier in Azure Blob Storage?",
+    "options": [
+      "Up to 24 hours",
+      "Up to 12 hours",
+      "Up to 15 hours",
+      "Up to 48 hours"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 37,
+    "question": "What does an SAS token incorporate as part of the token?",
+    "options": [
+      "Access parameters such as start and end time, permissions, and allowed IP addresses",
+      "Access parameters such as start and end time, permissions, and encryption keys",
+      "Access parameters such as start and end time, permissions, and storage redundancy options",
+      "Access parameters such as start and end time, permissions, and network security groups"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 38,
+    "question": "If you need to mount an Azure file share on a Linux virtual machine, which command should you use?",
+    "options": [
+      "azcopy copy command",
+      "net use command with Azure credentials",
+      "mount command with cifs type",
+      "azcopy sync command with the Linux file path"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 39,
+    "question": "What is the only way to revoke an existing SAS token before its expiry time if it does not reference a stored access policy?",
+    "options": [
+      "Deleting the storage account",
+      "Regenerating the storage account key",
+      "Changing the network security group settings",
+      "Modifying the Azure subscription settings"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 40,
+    "question": "An organization wants to safeguard their storage account access keys. What Azure service can they use?",
+    "options": [
+      "Azure Security Center",
+      "Azure Monitor",
+      "Azure Key Vault",
+      "Azure Resource Manager"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 41,
+    "question": "What is the availability SLA for read requests in a storage account using RA-GZRS replication?",
+    "options": [
+      "At least 99.9 percent",
+      "At least 99.99 percent",
+      "At least 99.999 percent",
+      "At least 99 percent"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 42,
+    "question": "Which access tier is designed for long-term storage with rare access and several hours of retrieval latency?",
+    "options": [
+      "Hot",
+      "Cool",
+      "Cold",
+      "Archive"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 43,
+    "question": "How can you regenerate storage account access keys using PowerShell?",
+    "options": [
+      "By using the Set-AzStorageAccountKey cmdlet",
+      "By using the New-AzStorageAccountKey cmdlet",
+      "By using the Renew-AzStorageAccountKey cmdlet",
+      "By using the Update-AzStorageAccountKey cmdlet"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 44,
+    "question": "When configuring a storage firewall, which IP address ranges are not allowed, and what should be used instead?",
+    "options": [
+      "/32 and /31 CIDR ranges; individual IP addresses for small ranges",
+      "Private IP address ranges; public Internet IP address space",
+      "/24 and /16 CIDR ranges; specific IP addresses",
+      "Private IP address ranges; Azure Private Link"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 45,
+    "question": "Which storage account type supports GRS replication?",
+    "options": [
+      "GPv1 and GPv2 only",
+      "Blob only",
+      "GPv1, GPv2, and Blob",
+      "GPv2 only"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 46,
+    "question": "Which protocol does Azure Files support for connecting directly from a computer outside of Azure?",
+    "options": [
+      "FTP",
+      "HTTP",
+      "SMB 3.0",
+      "SSH"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 47,
+    "question": "What compliance standard is Azure storage account encryption compliant with?",
+    "options": [
+      "ISO 27001",
+      "FIPS 140-2",
+      "SOC 2 Type II",
+      "GDPR"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 48,
+    "question": "What does a user delegation SAS enable?",
+    "options": [
+      "Grants access to containers and blobs",
+      "Supports access to all Azure resources",
+      "Supports access to queues and tables",
+      "Grants access to virtual machines and databases"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 49,
+    "question": "An organization needs to ensure that existing SAS tokens remain valid while modifying their parameters. What approach should they take?",
+    "options": [
+      "Use standard SAS tokens",
+      "Use account-level SAS",
+      "Use stored access policies",
+      "Use user delegation SAS"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 50,
+    "question": "Why is it important to choose the correct blob type when uploading a .vhd file for use with Azure virtual machines?",
+    "options": [
+      "To ensure compatibility with Azure VPN",
+      "To maximize storage efficiency",
+      "To ensure proper mounting as OS or data disk",
+      "To enforce encryption at rest"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 51,
+    "question": "What built-in RBAC role grants peek, retrieve, and delete permissions to messages in queues?",
+    "options": [
+      "Storage Queue Data Contributor",
+      "Storage Queue Data Reader",
+      "Storage Queue Data Message Processor",
+      "Storage Queue Data Message Sender"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 52,
+    "question": "What is the maximum number of destination accounts a source account can have in object replication?",
+    "options": [
+      "One",
+      "Two",
+      "Three",
+      "Four"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 53,
+    "question": "What is a key limitation of account-level SAS compared to service-level SAS?",
+    "options": [
+      "It does not support any permissions for accessing resources",
+      "It cannot be used for write and delete operations",
+      "It does not support stored access policies",
+      "It cannot be created using the Azure portal"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 54,
+    "question": "You need to configure a storage account to only allow access from a specific virtual network and subnet. What steps should you follow?",
+    "options": [
+      "Configure the storage firewall and add the IP addresses of the virtual network",
+      "Configure a service endpoint for the virtual network and subnet, then update the storage account networking settings",
+      "Use a shared access signature with the virtual network settings",
+      "Enable Azure Private Link for the storage account"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 55,
+    "question": "What is the maximum retention period for blob versions that have been soft deleted in Azure Blob Storage?",
+    "options": [
+      "30 days",
+      "90 days",
+      "180 days",
+      "365 days"
+    ],
+    "answer": [3]
+  }
+    ];
+    // ============================================================
+    // FIN DE ZONA PARA PEGAR JSON
+    // ============================================================
+
+    // Pequeño helper para obtener el/los índices correctos
+    function getCorrectIndexes(q) {
+      let c = q.correct ?? q.answer ?? q.answers;
+      if (Array.isArray(c)) return c.slice().sort();
+      if (typeof c === "number") return [c];
+      return []; // por si acaso
+    }
+
+    let current = 0;
+    let score = 0;
+    const answeredCorrectly = new Set();
+
+    const elCurrentIdx = document.getElementById("currentIdx");
+    const elTotalQ = document.getElementById("totalQ");
+    const elScore = document.getElementById("score");
+    const elQId = document.getElementById("qId");
+    const elQText = document.getElementById("qText");
+    const elOptions = document.getElementById("options");
+    const elMultiBadge = document.getElementById("multiBadge");
+    const elFeedback = document.getElementById("feedback");
+    const elExplanation = document.getElementById("explanation");
+    const btnPrev = document.getElementById("prevBtn");
+    const btnNext = document.getElementById("nextBtn");
+    const btnCheck = document.getElementById("checkBtn");
+
+    function renderQuestion() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const isMulti = correctIdx.length > 1;
+
+      elCurrentIdx.textContent = current + 1;
+      elTotalQ.textContent = questions.length;
+      elQId.textContent = q.id || "";
+      elQText.textContent = q.question || "";
+      elFeedback.textContent = "";
+      elFeedback.className = "feedback";
+      elExplanation.textContent = "";
+
+      elMultiBadge.style.display = isMulti ? "block" : "none";
+
+      elOptions.innerHTML = "";
+      const inputType = isMulti ? "checkbox" : "radio";
+
+      (q.options || []).forEach((opt, idx) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "option";
+        wrapper.dataset.index = idx;
+
+        const input = document.createElement("input");
+        input.type = inputType;
+        input.name = "option";
+        input.className = "opt-input";
+
+        const span = document.createElement("div");
+        span.className = "option-label";
+        span.textContent = opt;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        elOptions.appendChild(wrapper);
+      });
+
+      // botonera
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === questions.length - 1;
+    }
+
+    function getSelectedIndexes() {
+      const nodes = elOptions.querySelectorAll(".opt-input");
+      const selected = [];
+      nodes.forEach((input, idx) => {
+        if (input.checked) selected.push(idx);
+      });
+      return selected.sort();
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const selected = getSelectedIndexes();
+
+      // limpiar estilos
+      elOptions.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("correct", "incorrect");
+      });
+
+      if (selected.length === 0) {
+        elFeedback.textContent = "Selecciona al menos una opción antes de validar.";
+        elFeedback.className = "feedback bad";
+        return;
+      }
+
+      const ok = arraysEqual(selected, correctIdx);
+
+      // marcar correctas/incorrectas visualmente
+      elOptions.querySelectorAll(".option").forEach(el => {
+        const idx = Number(el.dataset.index);
+        if (correctIdx.includes(idx)) {
+          el.classList.add("correct");
+        }
+        if (selected.includes(idx) && !correctIdx.includes(idx)) {
+          el.classList.add("incorrect");
+        }
+      });
+
+      if (ok) {
+        elFeedback.textContent = "✅ ¡Respuesta correcta!";
+        elFeedback.className = "feedback ok";
+        if (!answeredCorrectly.has(current)) {
+          answeredCorrectly.add(current);
+          score++;
+          elScore.textContent = score;
+        }
+      } else {
+        elFeedback.textContent = "❌ Respuesta incorrecta. Revisa las opciones marcadas en verde.";
+        elFeedback.className = "feedback bad";
+      }
+
+      if (q.explanation) {
+        elExplanation.textContent = q.explanation;
+      }
+    }
+
+    btnPrev.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    btnCheck.addEventListener("click", checkAnswer);
+
+    if (questions.length === 0) {
+      elQText.textContent = "Pega tu JSON en la constante 'questions' dentro del script.";
+      btnCheck.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>

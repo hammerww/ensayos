@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balotario AZ-104</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 640px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .question-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+    .option input {
+      margin-top: 0.25rem;
+      transform: scale(1.1);
+    }
+    .option-label {
+      font-size: 0.95rem;
+    }
+    .option.correct {
+      border-color: #16a34a;
+      background: rgba(22,163,74,0.12);
+    }
+    .option.incorrect {
+      border-color: #dc2626;
+      background: rgba(220,38,38,0.12);
+    }
+    .badge-multi {
+      font-size: 0.75rem;
+      color: #f97316;
+      margin-bottom: 0.25rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+    }
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .feedback {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .feedback.ok {
+      color: #4ade80;
+    }
+    .feedback.bad {
+      color: #fca5a5;
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div><span id="currentIdx">1</span>/<span id="totalQ">?</span></div>
+        <div class="pill">
+          Puntaje: <span id="score">0</span>
+        </div>
+      </div>
+
+      <div class="question-id" id="qId"></div>
+      <div class="badge-multi" id="multiBadge" style="display:none;">
+        (Selecciona todas las que apliquen)
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="options" id="options"></div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="prevBtn">Anterior</button>
+        <button class="btn-primary" id="checkBtn">Validar</button>
+        <button class="btn-secondary" id="nextBtn">Siguiente</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Pega aquí el contenido de balotario_az104_lotes1_7.json
+    // ============================================================
+    const questions = [
+
+  {
+    "id": 1,
+    "question": "You need to ensure DNS records are cleaned up automatically when associated Azure resources are deleted. Which Azure DNS feature should you use?",
+    "options": [
+      "SRV records",
+      "Alias records",
+      "CNAME records",
+      "TXT records"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 2,
+    "question": "What happens to a dynamically allocated public IP address when the associated virtual machine is stopped (deallocated)?",
+    "options": [
+      "The IP address remains the same",
+      "The IP address is released and returned to the pool",
+      "The IP address is reserved",
+      "The IP address is converted to static"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 3,
+    "question": "What is the effect of enabling a route table on a subnet in Azure?",
+    "options": [
+      "It changes the IP address range of the subnet",
+      "It overrides the default system routes for that subnet",
+      "It prevents the subnet from connecting to on-premises networks",
+      "It dynamically assigns IP addresses to resources in the subnet"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 4,
+    "question": "In a route table, if an IP address matches two rules, how is the route determined?",
+    "options": [
+      "By the first rule listed",
+      "By the longest prefix match algorithm",
+      "By random selection",
+      "By user preference"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 5,
+    "question": "What is the primary purpose of the Azure Bastion service?",
+    "options": [
+      "To manage VMs through a mobile app",
+      "To provide secure connections to Azure VMs using SSL",
+      "To automate the deployment of VMs",
+      "To create public IP addresses for VMs"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 6,
+    "question": "What is the default behavior of inbound traffic for a Basic SKU public IP address?",
+    "options": [
+      "Open by default",
+      "Closed by default",
+      "Uses NSGs to restrict inbound traffic by default",
+      "Zone redundant by default"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 7,
+    "question": "What is the maximum number of peering connections allowed per VNet?",
+    "options": [
+      "100",
+      "200",
+      "500",
+      "1000"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 8,
+    "question": "What is the primary function of a Network Security Group (NSG) in Azure?",
+    "options": [
+      "To manage resource access within a subscription",
+      "To enforce security rules on network traffic for Azure resources",
+      "To store application logs",
+      "To apply security rules to different user groups"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 9,
+    "question": "What must be the state of the virtual machine to access the Effective Security Rules view?",
+    "options": [
+      "Stopped",
+      "Deallocated",
+      "Running",
+      "Provisioning"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 10,
+    "question": "If Subnet1 has a service endpoint for storage and Subnet2 does not, what is the expected behavior when VMs from each subnet access a storage account?",
+    "options": [
+      "Both VMs use their private IP addresses as the source IP",
+      "VMs from Subnet1 use their private IP addresses, and VMs from Subnet2 use their public IP addresses",
+      "Both VMs use the public IP address of the storage account",
+      "VMs from Subnet1 use their public IP addresses, and VMs from Subnet2 use their private IP addresses"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 11,
+    "question": "An administrator needs to ensure high availability for web applications across Azure availability zones. Which Azure Load Balancer tier should they choose, and why?",
+    "options": [
+      "Basic tier, because it offers health probe metrics.",
+      "Standard tier, because it supports zone-specific deployments.",
+      "Standard tier, because it allows multiple frontend IP configurations.",
+      "Basic tier, because it has lower latency for incoming traffic."
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 12,
+    "question": "Which record type in Azure DNS maps a name to an IPv4 address?",
+    "options": [
+      "CNAME",
+      "CAA",
+      "A",
+      "MX"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 13,
+    "question": "A company is migrating its on-premises services to Azure. Which DNS-related consideration should they prioritize to ensure seamless migration without disrupting service availability?",
+    "options": [
+      "Configuring Alias records",
+      "Setting up reverse DNS lookup zones",
+      "Delegating DNS zones to Azure DNS",
+      "Configuring SOA records"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 14,
+    "question": "You are experiencing intermittent connectivity issues between two VMs in different subnets. Which Network Watcher tool should you use first to diagnose the problem?",
+    "options": [
+      "Connection Monitor",
+      "Connection Troubleshoot",
+      "Network Security Group Flow Logs",
+      "Azure Traffic Manager"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 15,
+    "question": "Which Azure feature provides full insight into how each outbound connection will be routed based on the destination IP address?",
+    "options": [
+      "Effective Routes",
+      "System Routes",
+      "User-defined Routes",
+      "IP Forwarding"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 16,
+    "question": "What is the maximum number of servers that can be included in a backend pool using a Basic-tier Load Balancer?",
+    "options": [
+      "500",
+      "1000",
+      "300",
+      "5000"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 17,
+    "question": "You need to securely connect to a VM without exposing RDP/SSH ports. Which Azure service will you use?",
+    "options": [
+      "NSG Flow Logs",
+      "Azure Bastion",
+      "Azure VPN Gateway",
+      "Azure Monitor"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 18,
+    "question": "What action must be taken before changing the address range of a subnet that already has resources deployed to it?",
+    "options": [
+      "Increase the size of the VNet",
+      "Delete all objects in the subnet",
+      "Disable all active resources in the subnet",
+      "Create a new subnet with the desired address range"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 19,
+    "question": "You are tasked with setting up DNS resolution for Azure VMs in a large enterprise network that spans multiple virtual networks (VNets). Which Azure DNS service or feature should you configure to ensure seamless name resolution across these VNets?",
+    "options": [
+      "Azure Traffic Manager",
+      "Azure-provided DNS",
+      "Recursive DNS",
+      "App Service Domains"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 20,
+    "question": "Where are service endpoints configured within Azure?",
+    "options": [
+      "At the VM level",
+      "At the Azure Active Directory level",
+      "At the subnet level of a virtual network",
+      "At the region level"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 21,
+    "question": "What prefix size must the AzureBastionSubnet have at a minimum, if it was deployed on or after November 2, 2021?",
+    "options": [
+      "/24",
+      "/26",
+      "/28",
+      "/29"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 22,
+    "question": "Which command can you use in Azure CLI to add a service endpoint to a subnet?",
+    "options": [
+      "az network vnet create",
+      "az network vnet subnet create",
+      "az network vnet subnet update",
+      "az network vnet service-endpoint create"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 23,
+    "question": "Your organization requires all public IP addresses to be in a specific contiguous IP address block for easier firewall rule management. Which feature should you use?",
+    "options": [
+      "Static allocation",
+      "Dynamic allocation",
+      "Public IP address prefix",
+      "Zone-redundant deployment"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 24,
+    "question": "In a scenario where multiple Azure VMs in different VNets need secure access to an Azure SQL Database, what is the recommended approach using private endpoints?",
+    "options": [
+      "Configure a private endpoint in each VNet and peer the VNets",
+      "Use Azure ExpressRoute for dedicated network connectivity",
+      "Deploy Azure Front Door for optimized traffic routing",
+      "Implement Azure VPN Gateway for secure tunneling"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 25,
+    "question": "If VNets are not peered, what is the deployment requirement for Azure Bastion?",
+    "options": [
+      "Deploy a single Bastion service in one VNet",
+      "Each VNet requires its own Bastion subnet and service",
+      "Use a VPN gateway to connect VNets",
+      "Implement a shared resource group"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 26,
+    "question": "You need to distribute 3-tuple hash traffic evenly across multiple backend servers for an application that handles sensitive financial transactions. Which load-balancing rule option should you choose and why?",
+    "options": [
+      "None, to maintain consistent session persistence",
+      "Source IP, for simple round-robin distribution",
+      "Source IP and Protocol, to maintain consistent mappings between client and backend servers",
+      "Least Connections, to direct traffic to the server with the fewest active connections"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 27,
+    "question": "What is the purpose of using service tags in NSG rules?",
+    "options": [
+      "To enforce strict security policies.",
+      "To control access to specific IP addresses.",
+      "To simplify rule management by grouping IP addresses.",
+      "To provide default security settings."
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 28,
+    "question": "What is a recommended practice for optimizing traffic flow directly to backend servers without passing through the load balancer, specifically for load-balancing traffic for a SQL Server Always On Availability Group listener?",
+    "options": [
+      "Enabling Floating IP for direct server return.",
+      "Configuring health probes with HTTPS support.",
+      "Using TCP reset on idle timeout settings.",
+      "Implementing HA Ports for load balancing."
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 29,
+    "question": "Which of the following cmdlets is used to perform Connection Troubleshoot via PowerShell?",
+    "options": [
+      "Test-AzNetworkWatcherConnection",
+      "Test-AzNetworkWatcherConnectivity",
+      "Test-AzNetworkConnectivity",
+      "Test-AzConnection"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 30,
+    "question": "How can an administrator effectively troubleshoot performance issues with Azure Load Balancer in a multi-tier application environment?",
+    "options": [
+      "Analyze outbound connectivity metrics.",
+      "Configure session persistence settings.",
+      "Monitor backend server health probe logs.",
+      "Enable TCP reset on idle timeout."
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 31,
+    "question": "What should you do if you want to ensure that outbound traffic from a VM to an Azure PaaS service uses private IP addresses instead of public ones?",
+    "options": [
+      "Configure an NSG on the subnet",
+      "Create a VPN gateway",
+      "Configure a service endpoint for the PaaS service",
+      "Use Azure Private Link"
+    ],
+    "correct_option": 2,
+    "explanation": "Configuring a service endpoint ensures that outbound traffic from VMs to the PaaS service uses private IPs instead of public ones."
+  },
+  {
+    "id": 32,
+    "question": "If an effective security rule denies traffic that should be allowed, what is a common solution?",
+    "options": [
+      "Increase the priority number of the allow rule",
+      "Remove all deny rules",
+      "Create a new NSG with only allow rules",
+      "Adjust the priority of the allow rule to a lower number than the deny rule"
+    ],
+    "correct_option": 3,
+    "explanation": "Allow rules must have lower priority numbers than deny rules to be evaluated first."
+  },
+  {
+    "id": 33,
+    "question": "Which option must be enabled to permit inter-spoke traffic via a Network Virtual Appliance (NVA) in a hub VNet?",
+    "options": [
+      "Allow Gateway Transit",
+      "Allow Forwarded Traffic",
+      "Allow Virtual Network Access",
+      "Allow Use Remote Gateways"
+    ],
+    "correct_option": 1,
+    "explanation": "Allow Forwarded Traffic must be enabled in VNet peerings to permit NVA-based routing."
+  },
+  {
+    "id": 34,
+    "question": "What is a potential benefit of using Azure Private Link over traditional private endpoints for accessing Azure services?",
+    "options": [
+      "Lower latency in data transmission",
+      "Improved scalability for network traffic",
+      "Enhanced security with Azure Front Door integration",
+      "Increased availability across Azure regions"
+    ],
+    "correct_option": 0,
+    "explanation": "Private Link provides a more direct and optimized network path, resulting in lower latency."
+  },
+  {
+    "id": 35,
+    "question": "You are troubleshooting a network issue and need to verify if a specific NSG rule is affecting traffic. What Azure feature will confirm the exact IP prefixes involved?",
+    "options": [
+      "Diagnostic Settings",
+      "Network Watcher",
+      "NSG Flow Logs",
+      "Effective Security Rules"
+    ],
+    "correct_option": 3,
+    "explanation": "Effective Security Rules display the exact IP prefixes evaluated on the NIC."
+  },
+  {
+    "id": 36,
+    "question": "Which next hop type is used to route traffic to a VPN Gateway?",
+    "options": [
+      "Virtual Appliance",
+      "Virtual Network",
+      "Virtual Network Gateway",
+      "Internet"
+    ],
+    "correct_option": 2,
+    "explanation": "The next hop type for routing to a VPN Gateway is 'Virtual Network Gateway'."
+  },
+  {
+    "id": 37,
+    "question": "What is the minimum interval, in seconds, for health probes on Azure Load Balancer?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "correct_option": 3,
+    "explanation": "Azure Load Balancer health probes have a minimum interval of 5 seconds."
+  },
+  {
+    "id": 38,
+    "question": "You need to set up an alert for a drop in performance between an Azure VM and an Internet endpoint. Which tool should you use?",
+    "options": [
+      "Connection Monitor",
+      "Connection Troubleshoot",
+      "Network Performance Monitor",
+      "Azure Security Center"
+    ],
+    "correct_option": 0,
+    "explanation": "Connection Monitor integrates with Azure Monitor to generate alerts on connectivity degradation."
+  },
+  {
+    "id": 39,
+    "question": "During a security audit, you need to provide evidence of all inbound and outbound rules applied to a VM's network interface. Which Azure feature should you use?",
+    "options": [
+      "NSG Flow Logs",
+      "Effective Security Rules",
+      "Azure Monitor",
+      "Traffic Analytics"
+    ],
+    "correct_option": 1,
+    "explanation": "Effective Security Rules show the actual rules applied to a NIC, including inherited and aggregated rules."
+  },
+  {
+    "id": 40,
+    "question": "You need to create an alias record for a public IP address resource hosted in Azure DNS. What is the primary advantage of this approach?",
+    "options": [
+      "It allows for dynamic IP allocation",
+      "The DNS record automatically updates if the IP address changes",
+      "It supports CNAME records at the root of the DNS domain",
+      "It allows specifying the IP address explicitly in the DNS record"
+    ],
+    "correct_option": 1,
+    "explanation": "Alias records auto-update when the underlying IP resource changes, removing the need for manual updates."
+  },
+  {
+    "id": 41,
+    "question": "Given the following NSG rules, explain which rule will apply for an inbound TCP connection on port 8080 with a source IP of 10.0.0.5:\n\nRule 1: Priority 100, Source Any, Destination Any, Protocol TCP, Destination Port 8080, Action Deny\nRule 2: Priority 200, Source 10.0.0.0/24, Destination Any, Protocol TCP, Destination Port 8080, Action Allow",
+    "options": [
+      "Rule 1",
+      "Rule 2",
+      "Both Rule 1 and Rule 2",
+      "Neither Rule as they are contradictory"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 42,
+    "question": "When creating an inbound rule for HTTP/HTTPS traffic in an NSG, what should the Destination Port Ranges be set to?",
+    "options": [
+      "80, 443",
+      "1-65535",
+      "21, 22",
+      "8080, 8443"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 43,
+    "question": "Which of the following route types has the highest precedence in Azure routing?",
+    "options": [
+      "System routes",
+      "BGP routes",
+      "User-defined routes",
+      "Forced tunneling routes"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 44,
+    "question": "What protocol options are available when configuring Connection Troubleshoot in Network Watcher?",
+    "options": [
+      "TCP and UDP",
+      "TCP and ICMP",
+      "ICMP and HTTP",
+      "UDP and ICMP"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 45,
+    "question": "A virtual machine needs to retain the same public IP address even when stopped and restarted. Which allocation method should be used?",
+    "options": [
+      "Dynamic",
+      "Static",
+      "Manual",
+      "Constant"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 46,
+    "question": "Which health probe type is supported only by Standard-tier Load Balancers?",
+    "options": [
+      "TCP",
+      "HTTP",
+      "HTTPS",
+      "UDP"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 47,
+    "question": "Which DNS record type is used to specify which certificate authorities can issue certificates for a domain in Azure DNS?",
+    "options": [
+      "CAA",
+      "SRV",
+      "MX",
+      "AAAA"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 48,
+    "question": "Which Azure service provides secure RDP and SSH connectivity to VMs in a virtual network?",
+    "options": [
+      "Azure Firewall",
+      "Azure Bastion",
+      "Azure VPN Gateway",
+      "Azure Traffic Manager"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 49,
+    "question": "Which Azure Load Balancer SKU is suitable for applications requiring zone-redundant deployments?",
+    "options": [
+      "Basic",
+      "Standard",
+      "Gateway",
+      "Regional"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 50,
+    "question": "What IP address is used as the destination when a VM communicates via a private endpoint to an Azure PaaS service?",
+    "options": [
+      "Public IP address of the Azure service",
+      "Private IP address of the VM",
+      "Private IP address of the private endpoint",
+      "Dynamic IP address assigned by Azure"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 51,
+    "question": "You need to allow traffic from a web server to an application server within the same subnet. Which Azure feature simplifies the management of this rule?",
+    "options": [
+      "Network Security Groups",
+      "Application Security Groups",
+      "Service Tags",
+      "Default NSG Rules"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 52,
+    "question": "What is a requirement when configuring inbound NAT rules in Azure Load Balancer?",
+    "options": [
+      "The frontend IP must be public.",
+      "NAT rules are only applicable for UDP protocols.",
+      "Backend servers must belong to the same availability set.",
+      "Each rule specifies a backend server, port, and protocol."
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 53,
+    "question": "What happens to traffic between peered VNets?",
+    "options": [
+      "It travels over the public Internet.",
+      "It travels over the Microsoft backbone infrastructure.",
+      "It requires a VPN connection.",
+      "It requires a virtual network gateway."
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 54,
+    "question": "Which diagnostic logs are available for configuration in Azure Load Balancer?",
+    "options": [
+      "Traffic analysis and session persistence logs.",
+      "Configuration change and resource allocation logs.",
+      "Synthetic transaction and latency distribution logs.",
+      "Performance metrics and health probe logs."
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 55,
+    "question": "What is the primary purpose of an Azure Virtual Network (VNet)?",
+    "options": [
+      "To manage Azure subscriptions",
+      "To provide a secure and isolated network environment for Azure resources",
+      "To store backup data for virtual machines",
+      "To automate deployment processes"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 56,
+    "question": "You are planning to deploy an Azure Load Balancer that must handle inbound traffic across multiple Azure regions. Which Load Balancer SKU should you choose?",
+    "options": [
+      "Basic Load Balancer, for cost efficiency",
+      "Standard Load Balancer, for zone-redundant deployments",
+      "Gateway Load Balancer, for cross-regional traffic management",
+      "Regional Load Balancer, for high availability within a single region"
+    ],
+    "answer": [1]
+  }      
+
+    ];
+    // ============================================================
+    // FIN DE ZONA PARA PEGAR JSON
+    // ============================================================
+
+    // Pequeño helper para obtener el/los índices correctos
+    function getCorrectIndexes(q) {
+      let c = q.correct ?? q.answer ?? q.answers;
+      if (Array.isArray(c)) return c.slice().sort();
+      if (typeof c === "number") return [c];
+      return []; // por si acaso
+    }
+
+    let current = 0;
+    let score = 0;
+    const answeredCorrectly = new Set();
+
+    const elCurrentIdx = document.getElementById("currentIdx");
+    const elTotalQ = document.getElementById("totalQ");
+    const elScore = document.getElementById("score");
+    const elQId = document.getElementById("qId");
+    const elQText = document.getElementById("qText");
+    const elOptions = document.getElementById("options");
+    const elMultiBadge = document.getElementById("multiBadge");
+    const elFeedback = document.getElementById("feedback");
+    const elExplanation = document.getElementById("explanation");
+    const btnPrev = document.getElementById("prevBtn");
+    const btnNext = document.getElementById("nextBtn");
+    const btnCheck = document.getElementById("checkBtn");
+
+    function renderQuestion() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const isMulti = correctIdx.length > 1;
+
+      elCurrentIdx.textContent = current + 1;
+      elTotalQ.textContent = questions.length;
+      elQId.textContent = q.id || "";
+      elQText.textContent = q.question || "";
+      elFeedback.textContent = "";
+      elFeedback.className = "feedback";
+      elExplanation.textContent = "";
+
+      elMultiBadge.style.display = isMulti ? "block" : "none";
+
+      elOptions.innerHTML = "";
+      const inputType = isMulti ? "checkbox" : "radio";
+
+      (q.options || []).forEach((opt, idx) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "option";
+        wrapper.dataset.index = idx;
+
+        const input = document.createElement("input");
+        input.type = inputType;
+        input.name = "option";
+        input.className = "opt-input";
+
+        const span = document.createElement("div");
+        span.className = "option-label";
+        span.textContent = opt;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        elOptions.appendChild(wrapper);
+      });
+
+      // botonera
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === questions.length - 1;
+    }
+
+    function getSelectedIndexes() {
+      const nodes = elOptions.querySelectorAll(".opt-input");
+      const selected = [];
+      nodes.forEach((input, idx) => {
+        if (input.checked) selected.push(idx);
+      });
+      return selected.sort();
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const selected = getSelectedIndexes();
+
+      // limpiar estilos
+      elOptions.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("correct", "incorrect");
+      });
+
+      if (selected.length === 0) {
+        elFeedback.textContent = "Selecciona al menos una opción antes de validar.";
+        elFeedback.className = "feedback bad";
+        return;
+      }
+
+      const ok = arraysEqual(selected, correctIdx);
+
+      // marcar correctas/incorrectas visualmente
+      elOptions.querySelectorAll(".option").forEach(el => {
+        const idx = Number(el.dataset.index);
+        if (correctIdx.includes(idx)) {
+          el.classList.add("correct");
+        }
+        if (selected.includes(idx) && !correctIdx.includes(idx)) {
+          el.classList.add("incorrect");
+        }
+      });
+
+      if (ok) {
+        elFeedback.textContent = "✅ ¡Respuesta correcta!";
+        elFeedback.className = "feedback ok";
+        if (!answeredCorrectly.has(current)) {
+          answeredCorrectly.add(current);
+          score++;
+          elScore.textContent = score;
+        }
+      } else {
+        elFeedback.textContent = "❌ Respuesta incorrecta. Revisa las opciones marcadas en verde.";
+        elFeedback.className = "feedback bad";
+      }
+
+      if (q.explanation) {
+        elExplanation.textContent = q.explanation;
+      }
+    }
+
+    btnPrev.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    btnCheck.addEventListener("click", checkAnswer);
+
+    if (questions.length === 0) {
+      elQText.textContent = "Pega tu JSON en la constante 'questions' dentro del script.";
+      btnCheck.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>

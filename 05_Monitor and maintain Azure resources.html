@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balotario AZ-104</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 640px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .question-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+    .option input {
+      margin-top: 0.25rem;
+      transform: scale(1.1);
+    }
+    .option-label {
+      font-size: 0.95rem;
+    }
+    .option.correct {
+      border-color: #16a34a;
+      background: rgba(22,163,74,0.12);
+    }
+    .option.incorrect {
+      border-color: #dc2626;
+      background: rgba(220,38,38,0.12);
+    }
+    .badge-multi {
+      font-size: 0.75rem;
+      color: #f97316;
+      margin-bottom: 0.25rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+    }
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .feedback {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .feedback.ok {
+      color: #4ade80;
+    }
+    .feedback.bad {
+      color: #fca5a5;
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div><span id="currentIdx">1</span>/<span id="totalQ">?</span></div>
+        <div class="pill">
+          Puntaje: <span id="score">0</span>
+        </div>
+      </div>
+
+      <div class="question-id" id="qId"></div>
+      <div class="badge-multi" id="multiBadge" style="display:none;">
+        (Selecciona todas las que apliquen)
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="options" id="options"></div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="prevBtn">Anterior</button>
+        <button class="btn-primary" id="checkBtn">Validar</button>
+        <button class="btn-secondary" id="nextBtn">Siguiente</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Pega aquí el contenido de balotario_az104_lotes1_7.json
+    // ============================================================
+    const questions = [
+
+  {
+    "id": 1,
+    "question": "What character is used to separate commands in Kusto queries?",
+    "options": [
+      ";",
+      "|",
+      ":",
+      "&"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 2,
+    "question": "How long are backup data retained when Soft Delete is enabled in Recovery Services Vault?",
+    "options": [
+      "7 days",
+      "14 days",
+      "30 days",
+      "60 days"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 3,
+    "question": "You need to search for a specific value across multiple tables in a Log Analytics Workspace. Which type of query should you use?",
+    "options": [
+      "Table-based query",
+      "Aggregate query",
+      "Search-based query",
+      "Summarization query"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 4,
+    "question": "What query language is used by Log Analytics in Azure Monitor?",
+    "options": [
+      "SQL",
+      "Kusto",
+      "T-SQL",
+      "GraphQL"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 5,
+    "question": "During a failover test using Azure Site Recovery, what should you do to ensure the test VMs do not interfere with production workloads?",
+    "options": [
+      "Disable all network interfaces of test VMs",
+      "Shut down production VMs during the test",
+      "Use Azure Policy to restrict test VMs",
+      "Use network security groups to isolate test VMs"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 6,
+    "question": "Which option ensures that restore points of the vault are created to prevent items from being deleted early?",
+    "options": [
+      "Redundancy",
+      "Vault properties",
+      "Networking",
+      "Backup encryption"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 7,
+    "question": "If an organization wants to maintain consistency across a cluster of VMs running the same workload, which feature should be used in the Manage tab?",
+    "options": [
+      "Site Recovery Contributor role",
+      "Replication policy",
+      "Replication groups",
+      "Failover direction"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 8,
+    "question": "If you want an alert to notify a team via chat services when triggered, which action should you configure in the Action Group?",
+    "options": [
+      "Runbook",
+      "Secure Webhook",
+      "ITSM",
+      "Webhook"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 9,
+    "question": "Which of the following can be configured in a Data Collection Rule?",
+    "options": [
+      "Virtual Network",
+      "Windows Event Logs",
+      "SQL Database",
+      "Blob Storage"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 10,
+    "question": "You want to visually review your network resources and manually check for misconfigurations. Which tool in Network Watcher will help you with this task?",
+    "options": [
+      "IP Flow Verify",
+      "Packet Capture",
+      "Next Hop",
+      "Network Topology"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 11,
+    "question": "Which port must be open for the Azure Monitor Agent to send telemetry data?",
+    "options": [
+      "80",
+      "443",
+      "21",
+      "8080"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 12,
+    "question": "What action should you take to ensure continuous backup reporting during a regional outage?",
+    "options": [
+      "Increase the number of backup policies",
+      "Use Azure Site Recovery for failover",
+      "Configure additional Log Analytics Workspaces",
+      "Enable Geo-Redundant Storage for Recovery Services Vault"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 13,
+    "question": "Which configuration setting ensures that the VM NIC is correctly associated in the target region during failover?",
+    "options": [
+      "Target resource group",
+      "Failover virtual network",
+      "Failover subnet",
+      "Availability options"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 14,
+    "question": "What is a potential limitation when filtering by resource type in Azure Monitor Alerts dashboard?",
+    "options": [
+      "You can only select one subscription",
+      "You cannot filter by resource type",
+      "You can only select resource types deployed to the selected resource group",
+      "You can only filter by time range"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 15,
+    "question": "You are troubleshooting a connectivity issue and want to verify if the traffic is being blocked by any NSG rule. Which tool should you use?",
+    "options": [
+      "Network Topology",
+      "Packet Check",
+      "IP Flow Verify",
+      "Next Hop"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 16,
+    "question": "What additional property is present in a multidimensional metric compared to a non-dimensional metric?",
+    "options": [
+      "Metric name",
+      "Time the value was collected",
+      "Resource with which the value is associated",
+      "Additional name–value pair"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 17,
+    "question": "While monitoring your storage accounts, you notice a high number of client errors. Which Azure Monitor feature can help you identify the cause?",
+    "options": [
+      "Network Insights",
+      "Storage Account Insights",
+      "VM Insights",
+      "Database Insights"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 18,
+    "question": "You need to back up a non-trusted launch VM that is not using Premium SSD v2 disks. Which specific policy configuration should you choose in Azure Backup?",
+    "options": [
+      "Enhanced policy with default settings",
+      "Standard policy with custom settings",
+      "Enhanced policy with custom settings",
+      "Premium policy with enhanced settings"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 19,
+    "question": "What is required to store backup reporting data for visualization in Azure?",
+    "options": [
+      "Azure Virtual Network",
+      "Log Analytics Workspace",
+      "Azure Data Lake",
+      "Azure SQL Database"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 20,
+    "question": "Which cmdlet is used to deploy Network Watcher via PowerShell?",
+    "options": [
+      "New-AzNetworkWatcher",
+      "Enable-AzNetworkWatcher",
+      "Start-AzNetworkWatcher",
+      "Configure-AzNetworkWatcher"
+    ],
+    "answer": [0]
+  },
+  {
+    "id": 21,
+    "question": "Which of the following is NOT a correct state of an alert in Azure Monitor?",
+    "options": [
+      "New",
+      "Acknowledged",
+      "In Progress",
+      "Closed"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 22,
+    "question": "Which Azure service records all backup operations as diagnostic data for backup reports?",
+    "options": [
+      "Azure Monitor",
+      "Azure Log Analytics",
+      "Recovery Services Vault",
+      "Azure Backup Service"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 23,
+    "question": "Which component of an Alert Rule determines what should happen when the alert rule condition is met?",
+    "options": [
+      "Target Resource",
+      "Conditional Logic",
+      "Action Group",
+      "Description"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 24,
+    "question": "Your company wants to ensure minimal data loss during a failover. Which replication method in Azure Site Recovery should you choose?",
+    "options": [
+      "Asynchronous replication",
+      "Synchronous replication",
+      "Near-synchronous replication",
+      "Scheduled replication"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 25,
+    "question": "Which of the following is NOT a backup policy type available in Azure Backup?",
+    "options": [
+      "Azure Virtual Machine",
+      "SAP HANA Database (Backint)",
+      "SQL Server in Azure VM",
+      "Azure Kubernetes Service (AKS)"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 26,
+    "question": "Which type of query tends to be more efficient and generally faster in Log Analytics?",
+    "options": [
+      "Search-based queries",
+      "Table-based queries",
+      "Aggregate queries",
+      "Summarization queries"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 27,
+    "question": "During a restoration process, you need to access specific files from a VM backup. What should you do?",
+    "options": [
+      "Select Restore VM and choose Replace Existing",
+      "Click File Recovery and download the recovery script",
+      "Modify the backup policy to include file-level backup",
+      "Use Azure Blob Storage to download files"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 28,
+    "question": "To restrict access to the vault from the internet and use a private endpoint, which configuration should you select?",
+    "options": [
+      "Backup encryption",
+      "Networking",
+      "Redundancy",
+      "Vault properties"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 29,
+    "question": "What is the default retention period for logs sent to a Log Analytics Workspace in Azure?",
+    "options": [
+      "15 days",
+      "30 days",
+      "60 days",
+      "90 days"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 30,
+    "question": "If your organization needs to allow outbound connectivity to Azure resources during Site Recovery, what should you consider configuring?",
+    "options": [
+      "Managed disks",
+      "Site Recovery Contributor rights",
+      "NSG rules with service tags",
+      "Failover virtual network"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 31,
+    "question": "What is recommended for Vault Storage Redundancy to ensure replicated backups in another region?",
+    "options": [
+      "Locally Redundant Storage (LRS) or Geo-Redundant Storage (GRS)",
+      "Zone Redundant Storage (ZRS) or Backup Storage (BS)",
+      "Geo-Redundant Storage (GRS) or Read Access Geo-Redundant Storage (RA-GRS)",
+      "Backup Storage (BS) or Locally Redundant Storage (LRS)"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 32,
+    "question": "Your organization requires daily backups for VMs, with instant restores. What feature of Azure Backup should you utilize?",
+    "options": [
+      "Scheduled backups",
+      "Ad-hoc backups",
+      "Snapshot-based backups",
+      "Incremental backups"
+    ],
+    "answer": [2]
+  },
+  {
+    "id": 33,
+    "question": "What specific setting in the Vault properties tab ensures that restore points are protected from early deletion?",
+    "options": [
+      "Cross Region Restore",
+      "Vault immutability",
+      "Local-redundant storage",
+      "Networking isolation"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 34,
+    "question": "A company wants to send its diagnostic logs from a Network Security Group to both a Log Analytics Workspace and an Event Hub. How can this be accomplished?",
+    "options": [
+      "By using the Azure CLI to create dual log destinations",
+      "By using only one log destination at a time",
+      "By enabling metrics collection for the NSG",
+      "By configuring multiple diagnostic settings for the NSG"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 35,
+    "question": "In Azure Site Recovery, where should the Recovery Services Vault be deployed in relation to the primary virtual machines for cross-region failover?",
+    "options": [
+      "Same region",
+      "Different region",
+      "Different subscription",
+      "Same resource group"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 36,
+    "question": "When associating multiple VMs with a single backup policy, what must be ensured for successful implementation?",
+    "options": [
+      "All VMs must be in the same resource group",
+      "All VMs must be in the same region as the Recovery Services Vault",
+      "All VMs must have the same operating system",
+      "All VMs must use the same storage type"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 37,
+    "question": "Which visualization types are available for Azure metrics charts in the Azure portal?",
+    "options": [
+      "Line Chart, Pie Chart, Scatter Chart, and Heatmap",
+      "Line Chart, Area Chart, Bar Chart, and Scatter Chart",
+      "Line Chart, Area Chart, Pie Chart, and Grid",
+      "Line Chart, Bar Chart, Heatmap, and Pie Chart"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 38,
+    "question": "You are tasked with restoring a VM from a backup. The VM must have the same configuration and target settings as before. What should you do?",
+    "options": [
+      "Use the File Recovery option",
+      "Use the Restore VM option and select Replace Existing",
+      "Use the Restore VM option and select Create New",
+      "Use Azure Site Recovery"
+    ],
+    "answer": [1]
+  },
+  {
+    "id": 39,
+    "question": "You need to ensure that your VM scale sets are being monitored effectively. Which configuration step should you verify in VM Insights?",
+    "options": [
+      "Check if the VMs are in the same resource group",
+      "Ensure that all VMs are using the same operating system",
+      "Confirm that storage accounts are linked",
+      "Verify that Data Collection Rules are enabled"
+    ],
+    "answer": [3]
+  },
+  {
+    "id": 40,
+    "question": "You are tasked with adding a new VM to an existing backup policy. What is the correct procedure to do this?",
+    "options": [
+      "Open the backup policy and click Add VM",
+      "Open the backup policy, click the Associated Items button, and then click Add",
+      "Open the VM blade and select Add to Backup Policy",
+      "Use Azure CLI to associate the VM with the backup policy"
+    ],
+    "answer": [1]
+  },
+{
+  "id": 41,
+  "question": "How do you initiate an ad-hoc backup for an Azure VM in Azure Backup?",
+  "options": [
+    "Navigate to Backup Policies and select the VM, then click Backup Now",
+    "Navigate to Protected Items in the Recovery Services Vault and select Backup Now",
+    "Open the Azure Portal and start a VM backup from the VM’s Overview page",
+    "Use PowerShell cmdlets to initiate backup for the VM"
+  ],
+  "answer": [1]
+},
+{
+  "id": 42,
+  "question": "Which of the following is NOT a valid location to send diagnostic logs?",
+  "options": [
+    "Azure Storage Account",
+    "Event Hub",
+    "Log Analytics Workspace",
+    "Azure Key Vault"
+  ],
+  "answer": [3]
+},
+{
+  "id": 43,
+  "question": "What are the possible next hop types that can be displayed by the Next Hop tool?",
+  "options": [
+    "Internet, VirtualAppliance, VirtualNetworkGateway, VirtualNetwork, VirtualNetworkPeering, VirtualNetworkServiceEndpoint, None",
+    "InternalNetwork, PublicIP, PrivateIP, Loopback, None",
+    "Gateway, Router, Switch, Firewall, None",
+    "ApplicationGateway, LoadBalancer, NetworkSecurityGroup, None"
+  ],
+  "answer": [0]
+},
+{
+  "id": 44,
+  "question": "What role is required to configure the replication in Azure Site Recovery?",
+  "options": [
+    "Owner",
+    "Contributor",
+    "Site Recovery Contributor",
+    "Site Recovery Operator"
+  ],
+  "answer": [2]
+},
+{
+  "id": 45,
+  "question": "In Azure Site Recovery, which component ensures that replicated data is stored securely and redundantly across Azure regions?",
+  "options": [
+    "Storage Account",
+    "Recovery Services Vault",
+    "Virtual Network",
+    "Availability Set"
+  ],
+  "answer": [1]
+},
+{
+  "id": 46,
+  "question": "How can you analyze trends across logs and metrics for your VMs using Azure Monitor?",
+  "options": [
+    "By configuring alerts in Network Insights",
+    "By using the Performance tab in VM Insights",
+    "By creating new storage accounts",
+    "By managing Azure subscriptions"
+  ],
+  "answer": [1]
+},
+{
+  "id": 47,
+  "question": "You need to create an alert that triggers when CPU usage on a virtual machine exceeds a certain threshold. What type of signal would you use?",
+  "options": [
+    "Log Search Queries",
+    "Activity Logs",
+    "Metrics",
+    "Event Hub"
+  ],
+  "answer": [2]
+},
+{
+  "id": 48,
+  "question": "An organization wants to retain metrics for longer than the default retention period. Where can they optionally send these metrics for extended retention?",
+  "options": [
+    "Azure Blob Storage",
+    "Azure File Storage",
+    "Azure Queue Storage",
+    "Azure Table Storage"
+  ],
+  "answer": [0]
+}
+
+ 
+
+    ];
+    // ============================================================
+    // FIN DE ZONA PARA PEGAR JSON
+    // ============================================================
+
+    // Pequeño helper para obtener el/los índices correctos
+    function getCorrectIndexes(q) {
+      let c = q.correct ?? q.answer ?? q.answers;
+      if (Array.isArray(c)) return c.slice().sort();
+      if (typeof c === "number") return [c];
+      return []; // por si acaso
+    }
+
+    let current = 0;
+    let score = 0;
+    const answeredCorrectly = new Set();
+
+    const elCurrentIdx = document.getElementById("currentIdx");
+    const elTotalQ = document.getElementById("totalQ");
+    const elScore = document.getElementById("score");
+    const elQId = document.getElementById("qId");
+    const elQText = document.getElementById("qText");
+    const elOptions = document.getElementById("options");
+    const elMultiBadge = document.getElementById("multiBadge");
+    const elFeedback = document.getElementById("feedback");
+    const elExplanation = document.getElementById("explanation");
+    const btnPrev = document.getElementById("prevBtn");
+    const btnNext = document.getElementById("nextBtn");
+    const btnCheck = document.getElementById("checkBtn");
+
+    function renderQuestion() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const isMulti = correctIdx.length > 1;
+
+      elCurrentIdx.textContent = current + 1;
+      elTotalQ.textContent = questions.length;
+      elQId.textContent = q.id || "";
+      elQText.textContent = q.question || "";
+      elFeedback.textContent = "";
+      elFeedback.className = "feedback";
+      elExplanation.textContent = "";
+
+      elMultiBadge.style.display = isMulti ? "block" : "none";
+
+      elOptions.innerHTML = "";
+      const inputType = isMulti ? "checkbox" : "radio";
+
+      (q.options || []).forEach((opt, idx) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "option";
+        wrapper.dataset.index = idx;
+
+        const input = document.createElement("input");
+        input.type = inputType;
+        input.name = "option";
+        input.className = "opt-input";
+
+        const span = document.createElement("div");
+        span.className = "option-label";
+        span.textContent = opt;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        elOptions.appendChild(wrapper);
+      });
+
+      // botonera
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === questions.length - 1;
+    }
+
+    function getSelectedIndexes() {
+      const nodes = elOptions.querySelectorAll(".opt-input");
+      const selected = [];
+      nodes.forEach((input, idx) => {
+        if (input.checked) selected.push(idx);
+      });
+      return selected.sort();
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const selected = getSelectedIndexes();
+
+      // limpiar estilos
+      elOptions.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("correct", "incorrect");
+      });
+
+      if (selected.length === 0) {
+        elFeedback.textContent = "Selecciona al menos una opción antes de validar.";
+        elFeedback.className = "feedback bad";
+        return;
+      }
+
+      const ok = arraysEqual(selected, correctIdx);
+
+      // marcar correctas/incorrectas visualmente
+      elOptions.querySelectorAll(".option").forEach(el => {
+        const idx = Number(el.dataset.index);
+        if (correctIdx.includes(idx)) {
+          el.classList.add("correct");
+        }
+        if (selected.includes(idx) && !correctIdx.includes(idx)) {
+          el.classList.add("incorrect");
+        }
+      });
+
+      if (ok) {
+        elFeedback.textContent = "✅ ¡Respuesta correcta!";
+        elFeedback.className = "feedback ok";
+        if (!answeredCorrectly.has(current)) {
+          answeredCorrectly.add(current);
+          score++;
+          elScore.textContent = score;
+        }
+      } else {
+        elFeedback.textContent = "❌ Respuesta incorrecta. Revisa las opciones marcadas en verde.";
+        elFeedback.className = "feedback bad";
+      }
+
+      if (q.explanation) {
+        elExplanation.textContent = q.explanation;
+      }
+    }
+
+    btnPrev.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    btnCheck.addEventListener("click", checkAnswer);
+
+    if (questions.length === 0) {
+      elQText.textContent = "Pega tu JSON en la constante 'questions' dentro del script.";
+      btnCheck.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Balotario AZ-104</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    body {
+      margin: 0;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 640px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      background: #111827;
+      border: 1px solid #1f2937;
+    }
+    .question-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid #1f2937;
+    }
+    .option input {
+      margin-top: 0.25rem;
+      transform: scale(1.1);
+    }
+    .option-label {
+      font-size: 0.95rem;
+    }
+    .option.correct {
+      border-color: #16a34a;
+      background: rgba(22,163,74,0.12);
+    }
+    .option.incorrect {
+      border-color: #dc2626;
+      background: rgba(220,38,38,0.12);
+    }
+    .badge-multi {
+      font-size: 0.75rem;
+      color: #f97316;
+      margin-bottom: 0.25rem;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+    }
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .feedback {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .feedback.ok {
+      color: #4ade80;
+    }
+    .feedback.bad {
+      color: #fca5a5;
+    }
+    .explanation {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div><span id="currentIdx">1</span>/<span id="totalQ">?</span></div>
+        <div class="pill">
+          Puntaje: <span id="score">0</span>
+        </div>
+      </div>
+
+      <div class="question-id" id="qId"></div>
+      <div class="badge-multi" id="multiBadge" style="display:none;">
+        (Selecciona todas las que apliquen)
+      </div>
+      <div class="question-text" id="qText"></div>
+      <div class="options" id="options"></div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="prevBtn">Anterior</button>
+        <button class="btn-primary" id="checkBtn">Validar</button>
+        <button class="btn-secondary" id="nextBtn">Siguiente</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Pega aquí el contenido de balotario_az104_lotes1_7.json
+    // ============================================================
+    const questions = [
+
+{
+"id": 1,
+"question": "What permission is required to create a custom role in Azure RBAC?",
+"options": [
+  "Microsoft.Authorization/roleAssignments/write",
+  "Microsoft.Authorization/roleDefinitions/write",
+  "Microsoft.Authorization/permissions/read",
+  "Microsoft.Authorization/roleAssignments/delete"
+],
+"answer": [1]
+},
+{
+"id": 2,
+"question": "If a user has multiple Azure RBAC role assignments with overlapping scopes, how is their effective access determined?",
+"options": [
+  "By the least privileged role assigned",
+  "By the most restrictive role assigned",
+  "By the role assigned last",
+  "By the most privileged role assigned"
+],
+"answer": [3]
+},
+{
+"id": 3,
+"question": "Which operations might fail when a Read-Only lock is applied to a resource? Select all that apply.",
+"options": [
+  "Creating new resources",
+  "Reading resource properties",
+  "Modifying resource tags",
+  "Deleting the resource"
+],
+"answer": [0, 2, 3]
+},
+{
+"id": 4,
+"question": "When creating a custom role in Azure, which of the following is not an available method?",
+"options": [
+  "Clone from an existing built-in role",
+  "Start from a pre-defined script",
+  "Start from scratch",
+  "Start from a JSON file"
+],
+"answer": [1]
+},
+{
+"id": 5,
+"question": "You want to gain a better understanding of how a particular deployment is configured. What is a simple way to achieve this using the Azure portal?",
+"options": [
+  "Manually inspect each resource",
+  "Export the deployment template",
+  "Use the Azure CLI to list all resources",
+  "Check the activity log for the deployment"
+],
+"answer": [1]
+},
+{
+"id": 6,
+"question": "You need to track costs associated with a specific environment across all resources in Azure. How should you apply tags to achieve this?",
+"options": [
+  "Apply tags at the resource group level",
+  "Apply tags at the subscription level",
+  "Apply tags individually to each resource",
+  "Apply tags using Azure Policy"
+],
+"answer": [2]
+},
+{
+"id": 7,
+"question": "How can you identify the effective permissions a user has on a specific resource in Azure?",
+"options": [
+  "By looking at the roles assigned at the subscription level only",
+  "By reviewing all role assignments at each scope level up to the resource",
+  "By checking the roles assigned at the resource group level",
+  "By consulting the Azure support team"
+],
+"answer": [1]
+},
+{
+"id": 8,
+"question": "Which Azure role assignment option can override inherited permissions in child scopes?",
+"options": [
+  "Adding a new role assignment with higher privileges",
+  "Applying a deny assignment using Azure Blueprints",
+  "Changing the parent resource's role assignments",
+  "Creating a new management group"
+],
+"answer": [1]
+},
+{
+"id": 9,
+"question": "If a guest user does not accept their invitation, what will their status remain as in Azure AD Entra ID?",
+"options": [
+  "Active",
+  "Invited User",
+  "Member",
+  "External User"
+],
+"answer": [1]
+},
+{
+"id": 10,
+"question": "You need to ensure that a critical storage account is not accidentally deleted. Which type of lock should you apply?",
+"options": [
+  "Read-Only lock",
+  "Delete lock",
+  "Block locks",
+  "Storage lock"
+],
+"answer": [1]
+},
+{
+"id": 11,
+"question": "What is the primary purpose of Role-Based Access Control (RBAC) in Microsoft Azure?",
+"options": [
+"To manage network configurations",
+"To control access to Azure resources",
+"To manage billing and subscriptions",
+"To configure virtual machines"
+],
+"answer": [1]
+},
+{
+"id": 12,
+"question": "You have assigned the Contributor role to a security principal at the subscription level. Later, you assign the Reader role to the same security principal at a specific resource group within that subscription. What is the outcome of these role assignments?",
+"options": [
+"The security principal will only have Reader access to the specific resource group.",
+"The security principal will retain Contributor access across the subscription and also to the resource group.",
+"The security principal’s access to the resource group will be limited to Reader.",
+"The security principal will lose all access to the resource group."
+],
+"answer": [1]
+},
+{
+"id": 13,
+"question": "Which scope is the top-most parent in Azure’s hierarchy for role assignments?",
+"options": [
+"Resource Group",
+"Subscription",
+"Management Group",
+"Individual Resource"
+],
+"answer": [2]
+},
+{
+"id": 14,
+"question": "What should be configured to ensure users are notified when a password reset occurs?",
+"options": [
+"The Registration blade",
+"The Notifications blade",
+"The User Settings blade",
+"The Authentication Methods blade"
+],
+"answer": [1]
+},
+{
+"id": 15,
+"question": "A user has been given the Contributor role at the resource group level but reports they cannot delete certain resources. What could be the reason?",
+"options": [
+"The resources are protected by resource locks.",
+"The user does not have the Reader role.",
+"The resources are in a different resource group.",
+"The user needs the Owner role to delete resources."
+],
+"answer": [0]
+},
+{
+"id": 16,
+"question": "Which of the following is a characteristic of the “Reader” role in Azure?",
+"options": [
+"It allows management of access permissions.",
+"It allows modification of resource configurations.",
+"It permits viewing of resources without any modifications.",
+"It allows the creation of new resources."
+],
+"answer": [2]
+},
+{
+"id": 17,
+"question": "How can budget alerts in Azure Cost Management be configured?",
+"options": [
+"Only at the subscription level",
+"At subscription, management group, and resource group levels",
+"Only at the resource group level",
+"At the service level only"
+],
+"answer": [1]
+},
+{
+"id": 18,
+"question": "What is the maximum number of resources that can be moved in a single operation using Azure Resource Manager?",
+"options": [
+"500",
+"800",
+"1000",
+"1200"
+],
+"answer": [1]
+},
+{
+"id": 19,
+"question": "You need to ensure that all resources in your Azure environment are tagged with \"Environment\" set to \"Dev/Test.\" How would you accomplish this using Azure Policy?",
+"options": [
+"Create a custom Azure RBAC role with tagging permissions.",
+"Use a policy definition with an \"Append\" effect to automatically add the tag.",
+"Assign the Reader role at the subscription level to enforce tagging.",
+"Configure a virtual network to add the tag to all resources."
+],
+"answer": [1]
+},
+{
+"id": 20,
+"question": "You need to ensure that a user can manage access to Azure resources but cannot make changes to Azure AD associations. Which role should you assign?",
+"options": [
+"Owner",
+"Contributor",
+"Reader",
+"User Access Administrator"
+],
+"answer": [3]
+},
+{
+"id": 21,
+"question": "In Azure RBAC, what is a 'scope'?",
+"options": [
+"The region where resources are deployed",
+"The set of permissions available to a role",
+"The boundary within which access is granted",
+"The list of users who can access a resource"
+],
+"answer": [2]
+},
+{
+"id": 22,
+"question": "Which authentication methods can be used for SSPR?",
+"options": [
+"Mobile app notification, Mobile app code, email, biometric data, office phone",
+"Email, password, mobile app code, mobile app notification",
+"Password, email, mobile phone, office phone, security questions",
+"Mobile app notification, mobile app code, email, mobile phone, office phone, security questions"
+],
+"answer": [3]
+},
+{
+"id": 23,
+"question": "Which statement accurately describes the process for changing a group's membership type in Entra ID?",
+"options": [
+"It is not possible to change a group's membership type once it is created.",
+"You can change the membership type of a group from static to dynamic or vice-versa.",
+"You can only change the membership type of a group from dynamic to static.",
+"Changing membership type requires creating a new group and deleting the old one."
+],
+"answer": [1]
+},
+{
+"id": 24,
+"question": "What role assignment would allow a user to modify the billing settings of an Azure subscription?",
+"options": [
+"Reader",
+"Contributor",
+"Billing Manager",
+"Account Administrator"
+],
+"answer": [3]
+},
+{
+"id": 25,
+"question": "What happens to the members of a static group when it is changed to a dynamic group?",
+"options": [
+"They remain in the group.",
+"They are manually reassigned.",
+"They are removed from the group.",
+"They receive new access permissions automatically."
+],
+"answer": [2]
+},
+{
+"id": 26,
+"question": "What additional feature is provided when SSPR is configured with on-premises integration?",
+"options": [
+"User can access cloud services only",
+"Passwords can be written back to the on-premises directory",
+"Users can only change their passwords",
+"IT support is required for every password reset"
+],
+"answer": [1]
+},
+{
+"id": 27,
+"question": "What does an 'Owner' role assignment typically allow a user to do in Azure?",
+"options": [
+"Only read the resource",
+"Create and delete resources but not manage access",
+"Manage all resources and also manage access to those resources",
+"Manage only network-related settings"
+],
+"answer": [2]
+},
+{
+"id": 28,
+"question": "Your organization wants to restrict the creation of virtual machines to only A-Series and D-Series SKUs and exclude a specific resource group from this policy. How would you set this up in Azure Policy?",
+"options": [
+"Create a policy definition to deny non-compliant VMs and use exclusions for the resource group.",
+"Assign the Owner role to the resource group and manually manage VM types.",
+"Use Azure RBAC to grant access only to compliant VM types.",
+"Configure the virtual network to block non-compliant VMs."
+],
+"answer": [0]
+},
+{
+"id": 29,
+"question": "What is the first step to create a guest user in Azure AD Entra ID?",
+"options": [
+"Select the Groups blade.",
+"Browse to your Azure AD Entra ID tenant and select the Users blade.",
+"Invite the user directly from the External Collaboration Settings.",
+"Modify the user's email settings."
+],
+"answer": [1]
+},
+{
+"id": 30,
+"question": "Which of the following management tools can be used to update user and group properties in Entra ID? Select all that apply.",
+"options": [
+"Azure portal",
+"Azure PowerShell",
+"Entra ID tenant",
+"Microsoft Graph"
+],
+"answer": [0, 1, 3]
+},
+{
+"id": 31,
+"question": "What is the difference between Security groups and Microsoft 365 groups in Entra ID?",
+"options": [
+"Security groups require a Premium Entra ID license, while Microsoft 365 groups do not.",
+"Security groups are automatically created, while Microsoft 365 groups are created manually.",
+"Security groups can only contain users, while Microsoft 365 groups can contain users and devices.",
+"Security groups are for Azure resources, while Microsoft 365 groups provide shared access to Office 365 features."
+],
+"answer": [3]
+},
+{
+"id": 32,
+"question": "Which scenario accurately describes the impact of applying a Delete lock to a resource within a resource group?",
+"options": [
+"Allows deletion but requires confirmation.",
+"Prevents both deletion and modification of the resource.",
+"Prevents deletion of the resource but allows modifications.",
+"Applies a lock only to child resources within the resource group."
+],
+"answer": [2]
+},
+{
+"id": 33,
+"question": "Which role in Azure RBAC has permissions to manage resources, security, and role assignments?",
+"options": [
+"Reader",
+"Contributor",
+"Owner",
+"User Access Administrator"
+],
+"answer": [2]
+},
+{
+"id": 34,
+"question": "Which Azure resource type does NOT support the application of tags?",
+"options": [
+"Virtual machines",
+"Resource groups",
+"Management groups",
+"Classic resources"
+],
+"answer": [3]
+},
+{
+"id": 35,
+"question": "Which roles are required to create a new user in Entra ID?",
+"options": [
+"User Administrator and Billing Administrator",
+"Security Administrator and Global Administrator",
+"Global Administrator and User Administrator",
+"Security Administrator and Compliance Administrator"
+],
+"answer": [2]
+},
+{
+"id": 36,
+"question": "At which scope can role assignments be applied in Azure?",
+"options": [
+"Subscription",
+"Resource Group",
+"Individual Resource",
+"All of the above"
+],
+"answer": [3]
+},
+{
+"id": 37,
+"question": "You are an administrator tasked with inviting a new consultant to the company’s Azure AD Entra ID tenant. Which steps should you follow to invite this external user?",
+"options": [
+"Create a new user and change their role to admin.",
+"Select the Users blade, choose +New User, and select Invite external user.",
+"Access the External Collaboration Settings and directly add the consultant.",
+"Modify the consultant’s Usage Location."
+],
+"answer": [1]
+},
+{
+"id": 38,
+"question": "A business unit frequently requests increases in their VM core quotas in Azure. How should they proceed to ensure they are not hindered by default limits?",
+"options": [
+"Use a different subscription for each region",
+"Enable auto-scaling to bypass quota limits",
+"Migrate to a larger subscription type",
+"Apply for a permanent quota increase from Azure support"
+],
+"answer": [3]
+},
+{
+"id": 39,
+"question": "You need to apply a policy that ensures all Azure resources in a specific resource group are tagged with 'Environment' and 'Dev'. Which Azure feature should you use to enforce this policy automatically?",
+"options": [
+"Azure Security Center",
+"Azure Policy",
+"Azure Resource Manager",
+"Azure AD Conditional Access"
+],
+"answer": [1]
+},
+{
+"id": 40,
+"question": "How many levels deep can the hierarchy of management groups go in Azure, excluding the root and subscription levels?",
+"options": [
+"3 levels",
+"4 levels",
+"5 levels",
+"6 levels"
+],
+"answer": [3]
+},
+{
+"id": 41,
+"question": "How does Azure RBAC applied at the management group level affect subscriptions?",
+"options": [
+  "It overrides all RBAC settings at the subscription level.",
+  "It applies RBAC settings only to resources within the management group.",
+  "It grants Owner access to all users within the management group.",
+  "It applies RBAC settings to all subscriptions under the management group."
+],
+"answer": [3]
+},
+{
+"id": 42,
+"question": "How can one create cloud-only users in Entra ID?",
+"options": [
+  "Through Azure PowerShell, Azure CLI, or the Azure portal",
+  "Only through Azure CLI",
+  "Only through the Azure portal",
+  "Through Azure PowerShell and the Azure portal"
+],
+"answer": [0]
+},
+{
+"id": 43,
+"question": "Where can the Consent Status of a guest user be viewed?",
+"options": [
+  "In the Azure portal under User Settings",
+  "In the Azure CLI",
+  "In PowerShell",
+  "In the Azure Resource Manager"
+],
+"answer": [2]
+},
+{
+"id": 44,
+"question": "How many role assignments can each Azure subscription have (not including role assignments at the management group scope)?",
+"options": [
+  "500",
+  "1,000",
+  "2,000",
+  "4,000"
+],
+"answer": [3]
+},
+{
+"id": 45,
+"question": "What happens if a user is granted read access at the subscription level?",
+"options": [
+  "The user can only read resources in that subscription.",
+  "The user can read and write resources in that subscription.",
+  "The user has read access to all resource groups and resources within that subscription.",
+  "The user can only access the subscription settings."
+],
+"answer": [2]
+},
+{
+"id": 46,
+"question": "Which of the following is true about role inheritance in Azure?",
+"options": [
+  "Child resources do not inherit roles from parent resources.",
+  "Roles assigned at a parent scope are automatically inherited by all child resources.",
+  "Roles assigned at a child scope are inherited by the parent scope.",
+  "Role inheritance is not supported in Azure."
+],
+"answer": [1]
+},
+{
+"id": 47,
+"question": "Which attribute of a group cannot be changed once it is created?",
+"options": [
+  "Group Name",
+  "Group Type",
+  "Group Description",
+  "Membership Type"
+],
+"answer": [1]
+},
+{
+"id": 48,
+"question": "Which role must a user have to create and remove role assignments at any scope in Azure?",
+"options": [
+  "Global Administrator or User Access Administrator",
+  "Owner or User Access Administrator",
+  "Reader or Owner",
+  "Contributor or Global Administrator"
+],
+"answer": [1]
+},
+{
+"id": 49,
+"question": "Why is it important to define a user’s Usage Location before assigning a license?",
+"options": [
+  "It ensures the user receives the correct job title.",
+  "It affects the availability of certain license features.",
+  "It updates the user’s email address.",
+  "It allows the user to access the Microsoft Store."
+],
+"answer": [1]
+},
+{
+"id": 50,
+"question": "What should you do before assigning a new Entra ID Premium P2 license to a user who recently relocated to a new country for work to ensure the user can access all relevant features?",
+"options": [
+  "Confirm the user's job title in the new country.",
+  "Update the user's Usage Location to the new country.",
+  "Assign a temporary license until the relocation is complete.",
+  "Add the user to a dynamic group based on the new job location."
+],
+"answer": [1]
+},
+{
+"id": 51,
+"question": "An organization wants to restrict a service principal from accessing child scopes under a resource group while allowing access to the parent scope. Which method should be used?",
+"options": [
+"Assign a deny assignment to the child scopes",
+"Remove the service principal from the parent scope",
+"Assign a lower privilege role to the child scopes",
+"Create a custom role with no permissions"
+],
+"answer": [0]
+},
+{
+"id": 52,
+"question": "Under what circumstance might you choose to apply tags using Azure PowerShell instead of the Azure portal?",
+"options": [
+"To enforce tag inheritance across resources",
+"To apply tags to classic resources",
+"To automate tag application across multiple resources",
+"To restrict tag access to specific user roles"
+],
+"answer": [2]
+},
+{
+"id": 53,
+"question": "Which action can only be performed by the Account Administrator in an Azure subscription?",
+"options": [
+"Manage resources within resource groups",
+"Add Co-Administrators to the subscription",
+"Manage billing and subscription creation",
+"Assign Azure RBAC roles to users"
+],
+"answer": [2]
+},
+{
+"id": 54,
+"question": "How can licenses be efficiently managed based on user properties?",
+"options": [
+"By creating static user lists",
+"By using role-based access controls",
+"By using Dynamic Groups",
+"By frequently auditing each user"
+],
+"answer": [2]
+},
+{
+"id": 55,
+"question": "Which license is required for a cloud-only user to reset their password using SSPR?",
+"options": [
+"Azure ADEentra ID Free",
+"Microsoft 365 Business Standard",
+"Microsoft 365 Business Essentials",
+"Azure ADEntra ID Free P2"
+],
+"answer": [1]
+},
+{
+"id": 56,
+"question": "What is a limitation of the root management groups in Azure?",
+"options": [
+"They cannot contain more than 50 subscriptions",
+"They do not support RBAC configurations",
+"They cannot be nested within each other",
+"They cannot be moved or deleted once created"
+],
+"answer": [3]
+},
+{
+"id": 57,
+"question": "How can you restrict guest user invitations in Azure AD Entra ID?",
+"options": [
+"By revoking the guest’s consent status",
+"By disabling the invitation feature",
+"By accessing the Manage External Collaboration Settings",
+"By changing the user's role to guest"
+],
+"answer": [2]
+},
+{
+"id": 58,
+"question": "What is required to create dynamic groups in Entra ID?",
+"options": [
+"A Basic Entra ID license",
+"A Free Microsoft account",
+"A Premium Microsoft Entra ID P1 or P2 AD license",
+"Any Office 365 subscription"
+],
+"answer": [2]
+},
+{
+"id": 59,
+"question": "What is the impact of disabling a device in Entra ID?",
+"options": [
+"It prevents the device from being used with any services",
+"It stops the user from accessing the Entra ID resource and all resources",
+"It prevents the device from accessing Entra ID resources",
+"It restricts the device's network access permanently"
+],
+"answer": [2]
+},
+{
+"id": 60,
+"question": "What can be included in a policy definition to support its re-use across multiple scopes?",
+"options": [
+"Management groups",
+"Parameter sets",
+"Resource groups",
+"Azure regions"
+],
+"answer": [1]
+},
+{
+"id": 61,
+"question": "Which of the following are types of resource locks in Azure? Select all that apply.",
+"options": [
+"Delete",
+"Modify",
+"Read-only",
+"Update"
+],
+"answer": [0, 2]
+},
+{
+"id": 62,
+"question": "What is required before assigning a license to a user account?",
+"options": [
+"The user must be an administrator and the Usage Location must be configured.",
+"The license must be purchased and the Usage Location must be configured.",
+"The user must be in a dynamic group and the license must be purchased.",
+"The user must have a premium subscription and be an administrator."
+],
+"answer": [1]
+},
+{
+"id": 63,
+"question": "What role is required to enable or disable devices in Entra ID?",
+"options": [
+"Device Administrator",
+"Global Administrator",
+"User Administrator",
+"Owner"
+],
+"answer": [1]
+},
+{
+"id": 64,
+"question": "You need to ensure that a department within your organization is aware of their Azure spending without preventing them from consuming more resources. What should you configure?",
+"options": [
+"A resource limit",
+"A spending quota with a budget alert",
+"A role-based access control (RBAC) policy",
+"An Azure Policy to restrict spending"
+],
+"answer": [1]
+},
+{
+"id": 65,
+"question": "When creating a resource group, what attribute specifies where the metadata for the resource group is stored?",
+"options": [
+"Region",
+"Subscription ID",
+"Resource Group Name",
+"Resource Provider"
+],
+"answer": [0]
+}
+ 
+
+    ];
+    // ============================================================
+    // FIN DE ZONA PARA PEGAR JSON
+    // ============================================================
+
+    // Pequeño helper para obtener el/los índices correctos
+    function getCorrectIndexes(q) {
+      let c = q.correct ?? q.answer ?? q.answers;
+      if (Array.isArray(c)) return c.slice().sort();
+      if (typeof c === "number") return [c];
+      return []; // por si acaso
+    }
+
+    let current = 0;
+    let score = 0;
+    const answeredCorrectly = new Set();
+
+    const elCurrentIdx = document.getElementById("currentIdx");
+    const elTotalQ = document.getElementById("totalQ");
+    const elScore = document.getElementById("score");
+    const elQId = document.getElementById("qId");
+    const elQText = document.getElementById("qText");
+    const elOptions = document.getElementById("options");
+    const elMultiBadge = document.getElementById("multiBadge");
+    const elFeedback = document.getElementById("feedback");
+    const elExplanation = document.getElementById("explanation");
+    const btnPrev = document.getElementById("prevBtn");
+    const btnNext = document.getElementById("nextBtn");
+    const btnCheck = document.getElementById("checkBtn");
+
+    function renderQuestion() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const isMulti = correctIdx.length > 1;
+
+      elCurrentIdx.textContent = current + 1;
+      elTotalQ.textContent = questions.length;
+      elQId.textContent = q.id || "";
+      elQText.textContent = q.question || "";
+      elFeedback.textContent = "";
+      elFeedback.className = "feedback";
+      elExplanation.textContent = "";
+
+      elMultiBadge.style.display = isMulti ? "block" : "none";
+
+      elOptions.innerHTML = "";
+      const inputType = isMulti ? "checkbox" : "radio";
+
+      (q.options || []).forEach((opt, idx) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "option";
+        wrapper.dataset.index = idx;
+
+        const input = document.createElement("input");
+        input.type = inputType;
+        input.name = "option";
+        input.className = "opt-input";
+
+        const span = document.createElement("div");
+        span.className = "option-label";
+        span.textContent = opt;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(span);
+        elOptions.appendChild(wrapper);
+      });
+
+      // botonera
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === questions.length - 1;
+    }
+
+    function getSelectedIndexes() {
+      const nodes = elOptions.querySelectorAll(".opt-input");
+      const selected = [];
+      nodes.forEach((input, idx) => {
+        if (input.checked) selected.push(idx);
+      });
+      return selected.sort();
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
+    function checkAnswer() {
+      const q = questions[current];
+      const correctIdx = getCorrectIndexes(q);
+      const selected = getSelectedIndexes();
+
+      // limpiar estilos
+      elOptions.querySelectorAll(".option").forEach(el => {
+        el.classList.remove("correct", "incorrect");
+      });
+
+      if (selected.length === 0) {
+        elFeedback.textContent = "Selecciona al menos una opción antes de validar.";
+        elFeedback.className = "feedback bad";
+        return;
+      }
+
+      const ok = arraysEqual(selected, correctIdx);
+
+      // marcar correctas/incorrectas visualmente
+      elOptions.querySelectorAll(".option").forEach(el => {
+        const idx = Number(el.dataset.index);
+        if (correctIdx.includes(idx)) {
+          el.classList.add("correct");
+        }
+        if (selected.includes(idx) && !correctIdx.includes(idx)) {
+          el.classList.add("incorrect");
+        }
+      });
+
+      if (ok) {
+        elFeedback.textContent = "✅ ¡Respuesta correcta!";
+        elFeedback.className = "feedback ok";
+        if (!answeredCorrectly.has(current)) {
+          answeredCorrectly.add(current);
+          score++;
+          elScore.textContent = score;
+        }
+      } else {
+        elFeedback.textContent = "❌ Respuesta incorrecta. Revisa las opciones marcadas en verde.";
+        elFeedback.className = "feedback bad";
+      }
+
+      if (q.explanation) {
+        elExplanation.textContent = q.explanation;
+      }
+    }
+
+    btnPrev.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    });
+
+    btnNext.addEventListener("click", () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    btnCheck.addEventListener("click", checkAnswer);
+
+    if (questions.length === 0) {
+      elQText.textContent = "Pega tu JSON en la constante 'questions' dentro del script.";
+      btnCheck.disabled = true;
+      btnNext.disabled = true;
+      btnPrev.disabled = true;
+    } else {
+      renderQuestion();
+    }
+  </script>
+</body>
+</html>
